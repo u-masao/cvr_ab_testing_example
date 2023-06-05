@@ -3,10 +3,18 @@ import logging
 from typing import Any, Dict
 
 import click
+from scipy.status import bernoulli
 
 
 def make_dataset(kwargs: Dict) -> Dict:
-    return {}
+    results = {}
+    results["n_a"] = kwargs["n_a"]
+    results["n_b"] = kwargs["n_b"]
+    results["p_a"] = kwargs["p_a"]
+    results["p_b"] = kwargs["p_b"]
+    results["obs_a"] = bernoulli.rvs(p=kwargs["p_a"], size=kwargs["n_a"])
+    results["obs_b"] = bernoulli.rvs(p=kwargs["p_b"], size=kwargs["n_b"])
+    return results
 
 
 @click.command()
