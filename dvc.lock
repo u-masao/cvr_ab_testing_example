@@ -10,3 +10,16 @@ stages:
     - path: data/interim/dataset.pickle
       md5: 54dac179544891f1d8ec4475800fd742
       size: 18253
+  sampling:
+    cmd: poetry run python -m src.models.sampling data/interim/dataset.pickle data/interim/model_and_trace.pickle
+    deps:
+    - path: data/interim/dataset.pickle
+      md5: 54dac179544891f1d8ec4475800fd742
+      size: 18253
+    - path: src/models/sampling.py
+      md5: d070c171640276456c1dd8927e13283d
+      size: 991
+    outs:
+    - path: data/interim/model_and_trace.pickle
+      md5: b9a2856b54fe2fb6d142ab5b434c9888
+      size: 16
