@@ -1,5 +1,7 @@
 import logging
+import os
 import pickle
+from pathlib import Path
 from typing import Any, Dict, Tuple
 
 import click
@@ -20,8 +22,10 @@ def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
     logger.info(f"trials: {trials}")
     logger.info(f"successes: {successes}")
 
-    # define model
+    # init model
     model = pm.Model()
+
+    # define model
     with model:
         p = pm.Beta("p", alpha=1.0, beta=1.0, shape=2)
         obs = pm.Binomial(  # noqa: F841
@@ -54,9 +58,10 @@ def main(**kwargs: Any) -> None:
     trace, model = sampling(dataset, kwargs)
 
     logger.info(f"pickle output filepath: {kwargs['output_filepath']}")
-    with open(kwargs["output_filepath"], "wb") as fo:
-        pickle.dump(trace, fo)
-        pickle.dump(model, fo)
+    output_filepath = Path(kwargs["output_filepath"])
+    os.makedirs(output_filepath.parent, exist_ok=True)
+    with open(output_filepath, "wb") as fo:
+        pickle.dump((trace, model), fo)
 
     logger.info("complete")
 
