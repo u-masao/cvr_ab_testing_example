@@ -1,0 +1,12 @@
+schema: '2.0'
+stages:
+  make_dataset:
+    cmd: poetry run python -m src.data.make_dataset data/interim/dataset.pickle
+    deps:
+    - path: src/data/make_dataset.py
+      md5: 507e9046df8499ce3b15174a290fd8a7
+      size: 731
+    outs:
+    - path: data/interim/dataset.pickle
+      md5: 99914b932bd37a50b983c5e7c90ae93b
+      size: 2
