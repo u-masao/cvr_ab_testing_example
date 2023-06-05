@@ -4,8 +4,8 @@ stages:
     cmd: poetry run python -m src.data.make_dataset data/interim/dataset.pickle
     deps:
     - path: src/data/make_dataset.py
-      md5: 5fd3e9d05abc717da5508aeefe4d0b95
-      size: 1291
+      md5: a0929b84d0b1f7f1b81ce84175272106
+      size: 1327
     outs:
     - path: data/interim/dataset.pickle
       md5: 54dac179544891f1d8ec4475800fd742
