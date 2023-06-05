@@ -8,17 +8,22 @@ from scipy.status import bernoulli
 
 def make_dataset(kwargs: Dict) -> Dict:
     results = {}
-    results["n_a"] = kwargs["n_a"]
-    results["n_b"] = kwargs["n_b"]
-    results["p_a"] = kwargs["p_a"]
-    results["p_b"] = kwargs["p_b"]
-    results["obs_a"] = bernoulli.rvs(p=kwargs["p_a"], size=kwargs["n_a"])
-    results["obs_b"] = bernoulli.rvs(p=kwargs["p_b"], size=kwargs["n_b"])
+    for n, p, obs in [["n_a", "p_a", "obs_a"], ["n_b", "p_b", "obs_b"]]:
+        results[n] = kwargs[n]
+        results[p] = kwargs[p]
+        results[obs] = bernoulli.rvs(
+            p=kwargs[p], size=kwargs[n], random_state=kwargs["random_state"]
+        )
     return results
 
 
 @click.command()
 @click.argument("output_filepath", type=click.Path())
+@click.option("--random_state", type=int, default=1234)
+@click.option("--n_a", type=int, default=1500)
+@click.option("--n_b", type=int, default=750)
+@click.option("--p_a", type=float, default=0.04)
+@click.option("--p_b", type=float, default=0.05)
 def main(**kwargs: Any) -> None:
     """メイン処理"""
     logger = logging.getLogger(__name__)
