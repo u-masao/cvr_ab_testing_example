@@ -9,7 +9,8 @@ import pymc as pm
 def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
 
     logger = logging.getLogger(__name__)
-    trials = successes = []
+    trials = []
+    successes = []
     for key in ["obs_a", "obs_b"]:
         trials.append(len(dataset[key]))
         successes.append(dataset[key].sum())
