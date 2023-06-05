@@ -36,7 +36,8 @@ def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
 
     # sampling
     with model:
-        trace = pm.sample(kwargs["n_sampling"])
+        step = pm.Metropolis()
+        trace = pm.sample(kwargs["n_sampling"], step=step)
 
     return trace, model
 
