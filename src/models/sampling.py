@@ -3,10 +3,30 @@ import pickle
 from typing import Any, Dict, Tuple
 
 import click
+import pymc as pm
 
 
 def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
-    trace, model = None, None
+
+    logger = logging.getLogger(__name__)
+    trials = successes = []
+    for key in ["obs_a", "obs_b"]:
+        trials.append(len(dataset[key]))
+        successes.append(dataset[key].sum())
+    logger.info(f"trials: {trials}")
+    logger.info(f"successes: {successes}")
+
+    model = pm.Model()
+    with model:
+        p = pm.Beta("p", alpha=1.0, beta=1.0, shape=2)
+        obs = pm.Binomial(  # noqa: F841
+            "y", n=trials, p=p, shape=2, observed=successes
+        )
+        relative_uplift = pm.Deterministic(  # noqa: F841
+            "relative_uplift", p[1] / p[0] - 1.0
+        )
+        trace = pm.sample(10000)
+
     return trace, model
 
 
