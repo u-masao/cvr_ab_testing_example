@@ -1,0 +1,9 @@
+stages:
+  make_dataset:
+    cmd: >-
+      poetry run python -m src.data.make_dataset
+      data/interim/dataset.pickle
+    deps:
+    - src/data/make_dataset.py
+    outs:
+    - data/interim/dataset.pickle
