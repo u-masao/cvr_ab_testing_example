@@ -35,6 +35,7 @@ def main(**kwargs: Any) -> None:
     with open(kwargs["output_filepath"], "wb") as fo:
         pickle.dump(dataset, fo)
 
+    logger.info(f"data: {dataset}")
     logger.info("complete")
 
 
