@@ -1,11 +1,10 @@
 import logging
-import os
 import pickle
-from pathlib import Path
 from typing import Any, Dict, Tuple
 
 import click
 import pymc as pm
+from src.utils import save_trace_and_model
 
 
 def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
@@ -48,20 +47,22 @@ def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
 @click.option("--n_sampling", type=int, default=10000)
 def main(**kwargs: Any) -> None:
     """メイン処理"""
+
+    # init log
     logger = logging.getLogger(__name__)
     logger.info("start process")
     logger.info(f"args: {kwargs}")
 
+    # load dataset
     with open(kwargs["input_filepath"], "rb") as fo:
         dataset = pickle.load(fo)
 
+    # modeling and sampling
     trace, model = sampling(dataset, kwargs)
 
+    # output
     logger.info(f"pickle output filepath: {kwargs['output_filepath']}")
-    output_filepath = Path(kwargs["output_filepath"])
-    os.makedirs(output_filepath.parent, exist_ok=True)
-    with open(output_filepath, "wb") as fo:
-        pickle.dump((trace, model), fo)
+    save_trace_and_model(trace, model, kwargs["output_filepath"])
 
     logger.info("complete")
 
