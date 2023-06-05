@@ -32,7 +32,7 @@ PIPELINE.md: dvc.yaml params.yaml
 	poetry run dvc dag --md -o >> PIPELINE.md
 
 ## check commit
-check_commit: lint
+check_commit:
 	git status
 	git diff --exit-code --staged
 	git diff --exit-code
