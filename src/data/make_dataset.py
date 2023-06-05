@@ -3,7 +3,7 @@ import logging
 from typing import Any, Dict
 
 import click
-from scipy.status import bernoulli
+from scipy.stats import bernoulli
 
 
 def make_dataset(kwargs: Dict) -> Dict:
