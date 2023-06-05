@@ -1,5 +1,5 @@
-import json
 import logging
+import pickle
 from typing import Any, Dict
 
 import click
@@ -31,9 +31,9 @@ def main(**kwargs: Any) -> None:
 
     dataset = make_dataset(kwargs)
 
-    logger.info(f"json output filepath: {kwargs['output_filepath']}")
-    with open(kwargs["output_filepath"], "w") as fo:
-        json.dump(dataset, fo, indent=4)
+    logger.info(f"pickle output filepath: {kwargs['output_filepath']}")
+    with open(kwargs["output_filepath"], "wb") as fo:
+        pickle.dump(dataset, fo)
 
     logger.info("complete")
 
