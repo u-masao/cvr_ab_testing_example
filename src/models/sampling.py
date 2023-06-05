@@ -8,7 +8,10 @@ import pymc as pm
 
 def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
 
+    # init logger
     logger = logging.getLogger(__name__)
+
+    # count obs
     trials = []
     successes = []
     for key in ["obs_a", "obs_b"]:
@@ -17,6 +20,7 @@ def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
     logger.info(f"trials: {trials}")
     logger.info(f"successes: {successes}")
 
+    # define model
     model = pm.Model()
     with model:
         p = pm.Beta("p", alpha=1.0, beta=1.0, shape=2)
@@ -26,7 +30,10 @@ def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
         relative_uplift = pm.Deterministic(  # noqa: F841
             "relative_uplift", p[1] / p[0] - 1.0
         )
-        trace = pm.sample(10000)
+
+    # sampling
+    with model:
+        trace = pm.sample(kwargs["n_sampling"])
 
     return trace, model
 
@@ -34,6 +41,7 @@ def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path())
+@click.option("--n_sampling", type=int, default=10000)
 def main(**kwargs: Any) -> None:
     """メイン処理"""
     logger = logging.getLogger(__name__)
@@ -47,7 +55,8 @@ def main(**kwargs: Any) -> None:
 
     logger.info(f"pickle output filepath: {kwargs['output_filepath']}")
     with open(kwargs["output_filepath"], "wb") as fo:
-        pickle.dump((trace, model), fo)
+        pickle.dump(trace, fo)
+        pickle.dump(model, fo)
 
     logger.info("complete")
 
