@@ -17,3 +17,15 @@ stages:
     - data/interim/dataset.pickle
     outs:
     - data/interim/model_and_trace.pickle
+  visualization:
+    cmd: >-
+      poetry run python -m src.visualization.visualize
+      data/interim/model_and_trace.pickle
+      data/interim/dataset.pickle
+      data/processed/result/
+    deps:
+    - src/visualization/visualize.py
+    - data/interim/model_and_trace.pickle
+    - data/interim/dataset.pickle
+    outs:
+    - data/processed/result/
