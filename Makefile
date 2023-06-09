@@ -39,8 +39,10 @@ check_commit:
 
 ## Lint using flake8
 lint:
-	poetry run pysen run format
-	poetry run pysen run lint
+	poetry run isort src
+	poetry run black src -l 79
+	poetry run flake8 src
+	poetry run mypy src
 
 #################################################################################
 # Self Documenting Commands                                                     #
