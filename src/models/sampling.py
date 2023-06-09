@@ -1,26 +1,33 @@
 import logging
 import pickle
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
 import click
 import cloudpickle
 import pymc as pm
 
 
-def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
-
+def aggregate(dataset: Dict) -> Tuple:
     # init logger
     logger = logging.getLogger(__name__)
-
     # count obs
     trials = []
     successes = []
     for key in ["obs_a", "obs_b"]:
+
+        # 試行回数を計算
         trials.append(len(dataset[key]))
+
+        # 成功数を計算
         successes.append(dataset[key].sum())
+
     logger.info(f"trials: {trials}")
     logger.info(f"successes: {successes}")
 
+    return trials, successes
+
+
+def define_model(trials: List, successes: List) -> pm.Model:
     # init model
     model = pm.Model()
 
@@ -33,6 +40,10 @@ def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
         relative_uplift = pm.Deterministic(  # noqa: F841
             "relative_uplift", p[1] / p[0] - 1.0
         )
+    return model
+
+
+def sampling(model: pm.Model, kwargs: Any) -> Tuple:
 
     # sampling
     with model:
@@ -64,8 +75,14 @@ def main(**kwargs: Any) -> None:
     # load dataset
     dataset = pickle.load(open(kwargs["input_filepath"], "rb"))
 
-    # modeling and sampling
-    model, trace = sampling(dataset, kwargs)
+    # 観測値を集計
+    trials, successes = aggregate(dataset)
+
+    # モデルを定義
+    model = define_model(trials, successes)
+
+    # sampling
+    model, trace = sampling(model, kwargs)
 
     # output
     cloudpickle.dump((model, trace), open(kwargs["output_filepath"], "wb"))
