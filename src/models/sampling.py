@@ -3,6 +3,7 @@ import pickle
 from typing import Any, Dict, Tuple
 
 import click
+import cloudpickle
 import pymc as pm
 
 
@@ -36,16 +37,22 @@ def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
     # sampling
     with model:
         step = pm.Metropolis()
-        trace = pm.sample(kwargs["n_sampling"], step=step)
+        trace = pm.sample(
+            kwargs["n_sampling"],
+            tune=kwargs["n_tune"],
+            step=step,
+            chains=kwargs["n_chains"],
+        )
 
     return model, trace
 
 
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
-@click.argument("output_model_filepath", type=click.Path())
-@click.argument("output_trace_filepath", type=click.Path())
+@click.argument("output_filepath", type=click.Path())
 @click.option("--n_sampling", type=int, default=10000)
+@click.option("--n_chains", type=int, default=5)
+@click.option("--n_tune", type=int, default=2000)
 def main(**kwargs: Any) -> None:
     """メイン処理"""
 
@@ -55,15 +62,13 @@ def main(**kwargs: Any) -> None:
     logger.info(f"args: {kwargs}")
 
     # load dataset
-    with open(kwargs["input_filepath"], "rb") as fo:
-        dataset = pickle.load(fo)
+    dataset = pickle.load(open(kwargs["input_filepath"], "rb"))
 
     # modeling and sampling
     model, trace = sampling(dataset, kwargs)
 
     # output
-    model.to_netcdf(kwargs["output_model_filepath"])
-    # trace.save(kwargs["output_trace_filepath"])
+    cloudpickle.dump((model, trace), open(kwargs["output_filepath"], "wb"))
 
     logger.info("complete")
 
