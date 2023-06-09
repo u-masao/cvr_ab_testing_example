@@ -8,8 +8,11 @@ import pymc as pm
 
 
 def aggregate(dataset: Dict) -> Tuple:
+    """0と1の観測値を試行回数と成功回数に集計"""
+
     # init logger
     logger = logging.getLogger(__name__)
+
     # count obs
     trials = []
     successes = []
@@ -18,7 +21,7 @@ def aggregate(dataset: Dict) -> Tuple:
         # 試行回数を計算
         trials.append(len(dataset[key]))
 
-        # 成功数を計算
+        # 成功回数を計算
         successes.append(dataset[key].sum())
 
     logger.info(f"trials: {trials}")
@@ -81,10 +84,10 @@ def main(**kwargs: Any) -> None:
     # モデルを定義
     model = define_model(trials, successes)
 
-    # sampling
+    # サンプリング
     model, trace = sampling(model, kwargs)
 
-    # output
+    # save model and trace
     cloudpickle.dump((model, trace), open(kwargs["output_filepath"], "wb"))
 
     logger.info("complete")
