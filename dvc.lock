@@ -17,11 +17,11 @@ stages:
       md5: 54dac179544891f1d8ec4475800fd742
       size: 18253
     - path: src/models/sampling.py
-      md5: 36ec05508a491168c88f636811af176f
-      size: 2459
+      md5: fc6d01ecee3dfa5f3ff093976fdf39e7
+      size: 2457
     outs:
     - path: data/interim/model_and_trace.pickle
-      md5: 05e7e51baf06a93959f91e392bc4c79f
+      md5: b7595965cf98bc1e54592290ea8c13b0
       size: 2609254
   visualization:
     cmd: poetry run python -m src.visualization.visualize data/interim/model_and_trace.pickle
