@@ -128,7 +128,7 @@ def plot_histogram_overlap(
     ax.set_title("$p_a$ と $p_b$ の分布")
 
 
-def plot_histogram(p_a_true, p_b_true, trace) -> mpl.Figure:
+def plot_histogram(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
     """plot histogram"""
     fig, axes = plt.subplots(5, 2, figsize=(16, 12))
     axes = axes.flatten()
