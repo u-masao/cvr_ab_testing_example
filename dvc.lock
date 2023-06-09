@@ -17,9 +17,27 @@ stages:
       md5: 54dac179544891f1d8ec4475800fd742
       size: 18253
     - path: src/models/sampling.py
-      md5: 715fda77222407e5b80f9d8e0411e698
-      size: 2363
+      md5: 36ec05508a491168c88f636811af176f
+      size: 2459
     outs:
     - path: data/interim/model_and_trace.pickle
-      md5: ec394a75ae13d1fb9bd05a8790e52264
+      md5: 05e7e51baf06a93959f91e392bc4c79f
       size: 2609254
+  visualization:
+    cmd: poetry run python -m src.visualization.visualize data/interim/model_and_trace.pickle
+      data/interim/dataset.pickle data/processed/result/
+    deps:
+    - path: data/interim/dataset.pickle
+      md5: 54dac179544891f1d8ec4475800fd742
+      size: 18253
+    - path: data/interim/model_and_trace.pickle
+      md5: 05e7e51baf06a93959f91e392bc4c79f
+      size: 2609254
+    - path: src/visualization/visualize.py
+      md5: 8c4ecd56d9086462d481363418b40434
+      size: 8791
+    outs:
+    - path: data/processed/result/
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
