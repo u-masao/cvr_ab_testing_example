@@ -17,7 +17,6 @@ def aggregate(dataset: Dict) -> Tuple:
     trials = []
     successes = []
     for key in ["obs_a", "obs_b"]:
-
         # 試行回数を計算
         trials.append(len(dataset[key]))
 
@@ -47,7 +46,6 @@ def define_model(trials: List, successes: List) -> pm.Model:
 
 
 def sampling(model: pm.Model, kwargs: Any) -> Tuple:
-
     # sampling
     with model:
         step = pm.Metropolis()
