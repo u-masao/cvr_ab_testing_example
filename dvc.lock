@@ -17,9 +17,9 @@ stages:
       md5: 54dac179544891f1d8ec4475800fd742
       size: 18253
     - path: src/models/sampling.py
-      md5: f38a6e2ec0bac6484cd9aebc80ceac57
-      size: 1834
+      md5: 715fda77222407e5b80f9d8e0411e698
+      size: 2363
     outs:
     - path: data/interim/model_and_trace.pickle
-      md5: 886f6201edcc23f9dc185f796752a41c
-      size: 1169222
+      md5: ec394a75ae13d1fb9bd05a8790e52264
+      size: 2609254
