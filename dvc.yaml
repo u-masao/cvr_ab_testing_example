@@ -11,9 +11,11 @@ stages:
     cmd: >-
       poetry run python -m src.models.sampling
       data/interim/dataset.pickle
-      data/interim/model_and_trace.pickle
+      data/interim/model.nc
+      data/interim/trace.nc
     deps:
     - src/models/sampling.py
     - data/interim/dataset.pickle
     outs:
-    - data/interim/model_and_trace.pickle
+    - data/interim/model.nc
+    - data/interim/trace.nc

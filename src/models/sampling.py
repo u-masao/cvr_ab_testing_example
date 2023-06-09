@@ -4,7 +4,6 @@ from typing import Any, Dict, Tuple
 
 import click
 import pymc as pm
-from src.utils import save_trace_and_model
 
 
 def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
@@ -39,12 +38,13 @@ def sampling(dataset: Dict, kwargs: Dict) -> Tuple:
         step = pm.Metropolis()
         trace = pm.sample(kwargs["n_sampling"], step=step)
 
-    return trace, model
+    return model, trace
 
 
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
-@click.argument("output_filepath", type=click.Path())
+@click.argument("output_model_filepath", type=click.Path())
+@click.argument("output_trace_filepath", type=click.Path())
 @click.option("--n_sampling", type=int, default=10000)
 def main(**kwargs: Any) -> None:
     """メイン処理"""
@@ -59,11 +59,11 @@ def main(**kwargs: Any) -> None:
         dataset = pickle.load(fo)
 
     # modeling and sampling
-    trace, model = sampling(dataset, kwargs)
+    model, trace = sampling(dataset, kwargs)
 
     # output
-    logger.info(f"pickle output filepath: {kwargs['output_filepath']}")
-    save_trace_and_model(trace, model, kwargs["output_filepath"])
+    model.save(kwargs["output_model_filepath"])
+    trace.save(kwargs["output_trace_filepath"])
 
     logger.info("complete")
 
