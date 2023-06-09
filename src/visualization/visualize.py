@@ -293,8 +293,9 @@ def main(**kwargs: Any) -> None:
 
     # 確信区間を計算
     hdi_prob = 0.95
-    ci = calc_ci(trace["p_a"], trace["p_b"], hdi_prob=hdi_prob)
+    ci = calc_ci(trace["p"][0], trace["p"][1], hdi_prob=hdi_prob)
     metrics.update(ci)
+    assert False
 
     # 指標を出力
     logger.info(f"metrics: {metrics}")
