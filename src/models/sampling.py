@@ -62,8 +62,8 @@ def main(**kwargs: Any) -> None:
     model, trace = sampling(dataset, kwargs)
 
     # output
-    model.save(kwargs["output_model_filepath"])
-    trace.save(kwargs["output_trace_filepath"])
+    model.to_netcdf(kwargs["output_model_filepath"])
+    # trace.save(kwargs["output_trace_filepath"])
 
     logger.info("complete")
 
