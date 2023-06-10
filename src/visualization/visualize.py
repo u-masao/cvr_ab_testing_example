@@ -208,9 +208,11 @@ def calc_ci(p, hdi_prob=0.95) -> Dict:
 
     p_a = p[:, :, 0]
     p_b = p[:, :, 1]
-
     p_diff = p_b - p_a
     p_ratio = p_diff / p_a
+
+    logger.info(f"p_a: {p_a}")
+    logger.info(f"p_b: {p_b}")
 
     # 確信区間を計算
     p_a_ci_low, p_a_ci_high = calc_credible_intervals(p_a, hdi_prob=hdi_prob)
