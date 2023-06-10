@@ -206,8 +206,8 @@ def calc_ci(p, hdi_prob=0.95) -> Dict:
     # init log
     logger = logging.getLogger(__name__)
 
-    p_a = p[:, :, 0]
-    p_b = p[:, :, 1]
+    p_a = p[:, :, 0].values
+    p_b = p[:, :, 1].values
     p_diff = p_b - p_a
     p_ratio = p_diff / p_a
 
