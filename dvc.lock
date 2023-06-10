@@ -4,24 +4,24 @@ stages:
     cmd: poetry run python -m src.data.make_dataset data/interim/dataset.pickle
     deps:
     - path: src/data/make_dataset.py
-      md5: a0929b84d0b1f7f1b81ce84175272106
-      size: 1327
+      md5: b38a37d8061f39d4d562584d7169d047
+      size: 1370
     outs:
     - path: data/interim/dataset.pickle
-      md5: 54dac179544891f1d8ec4475800fd742
-      size: 18253
+      md5: d95d8d5e568790e7b031e867412eb257
+      size: 18263
   sampling:
     cmd: poetry run python -m src.models.sampling data/interim/dataset.pickle data/interim/model_and_trace.pickle
     deps:
     - path: data/interim/dataset.pickle
-      md5: 54dac179544891f1d8ec4475800fd742
-      size: 18253
+      md5: d95d8d5e568790e7b031e867412eb257
+      size: 18263
     - path: src/models/sampling.py
       md5: fc6d01ecee3dfa5f3ff093976fdf39e7
       size: 2457
     outs:
     - path: data/interim/model_and_trace.pickle
-      md5: b7595965cf98bc1e54592290ea8c13b0
+      md5: 7e1000963bb6f2eea24a9acfec634283
       size: 2609254
   visualization:
     cmd: poetry run python -m src.visualization.visualize data/interim/model_and_trace.pickle
