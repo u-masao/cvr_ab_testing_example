@@ -4,6 +4,7 @@ import pickle
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+import arviz as az
 import click
 import cloudpickle
 import japanize_matplotlib  # noqa: F401
@@ -197,9 +198,12 @@ def load_theta(filepath) -> Tuple:
     return p_a_true, p_b_true, n_a, n_b, observations_a, observations_b
 
 
-def calc_ci(p_a, p_b, hdi_prob=0.95) -> Dict:
+def calc_ci(p, hdi_prob=0.95) -> Dict:
     # init log
     logger = logging.getLogger(__name__)
+
+    p_a = p[:, :, 0]
+    p_b = p[:, :, 1]
 
     p_diff = p_b - p_a
     p_ratio = p_diff / p_a
@@ -280,8 +284,7 @@ def main(**kwargs: Any) -> None:
     os.makedirs(kwargs["figure_dir"], exist_ok=True)
 
     # load model, trace, theta
-    trace, model = cloudpickle.load(open(kwargs["model_filepath"], "rb"))
-
+    model, trace = cloudpickle.load(open(kwargs["model_filepath"], "rb"))
     p_a_true, p_b_true, n_a, n_b, observations_a, observations_b = load_theta(
         kwargs["theta_filepath"]
     )
@@ -293,9 +296,8 @@ def main(**kwargs: Any) -> None:
 
     # 確信区間を計算
     hdi_prob = 0.95
-    ci = calc_ci(trace["p"][0], trace["p"][1], hdi_prob=hdi_prob)
+    ci = calc_ci(trace.posterior["p"], hdi_prob=hdi_prob)
     metrics.update(ci)
-    assert False
 
     # 指標を出力
     logger.info(f"metrics: {metrics}")
