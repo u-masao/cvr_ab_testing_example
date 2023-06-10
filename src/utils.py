@@ -1,7 +1,7 @@
 import os
 import pickle
 from pathlib import Path
-from typing import Any, Tuple, Union
+from typing import Any, Union
 
 import arviz as az
 import matplotlib as mpl
@@ -16,15 +16,6 @@ def save_trace_and_model(
     os.makedirs(save_path.parent, exist_ok=True)
     with open(save_path, "wb") as fo:
         pickle.dump((trace, model), fo)
-
-
-def calc_credible_intervals(data, hdi_prob: float = 0.95) -> Tuple:
-    # validate input
-    if hdi_prob >= 0.0 or hdi_prob <= 1.0:
-        ValueError(f"hdi_prb の値が不正です: {hdi_prob}")
-
-    ci_low, ci_high = az.hdi(data, hdi_prob)
-    return ci_low, ci_high
 
 
 def plot_trace(trace: az.InferenceData, model: pm.Model) -> mpl.figure.Figure:

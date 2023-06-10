@@ -10,6 +10,7 @@ import cloudpickle
 import japanize_matplotlib  # noqa: F401
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import mlflow
 import numpy as np
 import pandas as pd
 
@@ -110,6 +111,9 @@ def plot_histogram_single(
 def plot_histogram_overlap(
     ax, p_a_true, p_b_true, burned_trace, cumulative=False
 ) -> None:
+    """
+    オーバーラップしたヒストグラムを描画
+    """
     p_a = burned_trace.posterior["p"][:, :, 0].values.flatten()
     p_b = burned_trace.posterior["p"][:, :, 1].values.flatten()
     plot_histogram_single(
@@ -131,7 +135,7 @@ def plot_histogram_overlap(
     ax.set_title("$p_a$ と $p_b$ の分布")
 
 
-def plot_histogram(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
+def plot_distribution(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
     """plot histogram"""
     fig, axes = plt.subplots(5, 2, figsize=(16, 12))
     axes = axes.flatten()
@@ -265,6 +269,46 @@ def calc_prob_for_dicision(
     return pd.concat(results)
 
 
+def output_results(
+    p_a_true, p_b_true, model, trace, metrics, prob_summary_df, kwargs
+) -> None:
+    """結果を出力する"""
+
+    # init log
+    logger = logging.getLogger(__name__)
+
+    # make dirs
+    os.makedirs(kwargs["csv_output_dir"], exist_ok=True)
+    os.makedirs(kwargs["figure_dir"], exist_ok=True)
+
+    # 指標を出力
+    logger.info(f"metrics: {metrics}")
+    pd.DataFrame(metrics).to_csv(
+        Path(kwargs["csv_output_dir"]) / "metrics.csv"
+    )
+
+    # 意思決定に利用する確率を出力
+    prob_summary_df.to_csv(
+        Path(kwargs["csv_output_dir"]) / "prob_for_dicision.csv"
+    )
+
+    # 各 chain のトレースプロットを出力
+    savefig(
+        plot_trace(trace, model),
+        Path(kwargs["figure_dir"]) / "traceplot.png",
+    )
+
+    # サンプルの分布を出力
+    savefig(
+        plot_distribution(
+            p_a_true,
+            p_b_true,
+            trace,
+        ),
+        Path(kwargs["figure_dir"]) / "distribution.png",
+    )
+
+
 @click.command()
 @click.argument("model_filepath", type=click.Path(exists=True))
 @click.argument("theta_filepath", type=click.Path(exists=True))
@@ -272,6 +316,7 @@ def calc_prob_for_dicision(
 @click.option(
     "--figure_dir", type=click.Path(), default="reports/figures/cvr/"
 )
+@click.option("--mlflow_run_name", type=str, default="develop")
 def main(**kwargs: Any) -> None:
     """
     メイン処理
@@ -279,10 +324,13 @@ def main(**kwargs: Any) -> None:
     """
     # init log
     logger = logging.getLogger(__name__)
+    logger.info("start process")
+    mlflow.set_experiment("analysis")
+    mlflow.start_run(run_name=kwargs["mlflow_run_name"])
 
-    # make dirs
-    os.makedirs(kwargs["csv_output_dir"], exist_ok=True)
-    os.makedirs(kwargs["figure_dir"], exist_ok=True)
+    # log cli options
+    logger.info(f"args: \n{kwargs}")
+    mlflow.log_params({f"args.{k}": v for k, v in kwargs.items()})
 
     # load model, trace, theta
     model, trace = cloudpickle.load(open(kwargs["model_filepath"], "rb"))
@@ -300,35 +348,19 @@ def main(**kwargs: Any) -> None:
     ci = calc_ci(trace.posterior["p"], hdi_prob=hdi_prob)
     metrics.update(ci)
 
-    # 指標を出力
-    logger.info(f"metrics: {metrics}")
-    pd.DataFrame(metrics).to_csv(
-        Path(kwargs["csv_output_dir"]) / "metrics.csv"
-    )
-
     # 意思決定に利用する確率などの計算
     prob_summary_df = calc_prob_for_dicision(
         trace, model, p_a_true, p_b_true, observations_a, observations_b
     )
-    prob_summary_df.to_csv(
-        Path(kwargs["csv_output_dir"]) / "prob_for_dicision.csv"
+
+    # 結果を出力
+    output_results(
+        p_a_true, p_b_true, model, trace, metrics, prob_summary_df, kwargs
     )
 
-    # plot trace
-    savefig(
-        plot_trace(trace, model),
-        Path(kwargs["figure_dir"]) / "trace.png",
-    )
-
-    # plot histogram
-    savefig(
-        plot_histogram(
-            p_a_true,
-            p_b_true,
-            trace,
-        ),
-        Path(kwargs["figure_dir"]) / "histogram.png",
-    )
+    # cleanup
+    mlflow.end_run()
+    logger.info("complete")
 
 
 if __name__ == "__main__":

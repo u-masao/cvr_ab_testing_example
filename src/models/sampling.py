@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Tuple
 
 import click
 import cloudpickle
+import mlflow
 import pymc as pm
 
 
@@ -30,6 +31,7 @@ def aggregate(dataset: Dict) -> Tuple:
 
 
 def define_model(trials: List, successes: List) -> pm.Model:
+    """モデルを定義"""
     # init model
     model = pm.Model()
 
@@ -42,18 +44,24 @@ def define_model(trials: List, successes: List) -> pm.Model:
         relative_uplift = pm.Deterministic(  # noqa: F841
             "relative_uplift", p[1] / p[0] - 1.0
         )
+        uplift = pm.Deterministic("uplift", p[1] - p[0])  # noqa: F841
     return model
 
 
 def sampling(model: pm.Model, kwargs: Any) -> Tuple:
-    # sampling
+    """sampling"""
+
     with model:
+        # set Metropolis-Hastings sampling step
         step = pm.Metropolis()
+
+        # sampling
         trace = pm.sample(
             kwargs["n_sampling"],
             tune=kwargs["n_tune"],
             step=step,
             chains=kwargs["n_chains"],
+            random_seed=kwargs["random_seed"],
         )
 
     return model, trace
@@ -65,13 +73,20 @@ def sampling(model: pm.Model, kwargs: Any) -> Tuple:
 @click.option("--n_sampling", type=int, default=10000)
 @click.option("--n_chains", type=int, default=5)
 @click.option("--n_tune", type=int, default=2000)
+@click.option("--random_seed", type=int, default=1234)
+@click.option("--mlflow_run_name", type=str, default="develop")
 def main(**kwargs: Any) -> None:
     """メイン処理"""
 
     # init log
     logger = logging.getLogger(__name__)
     logger.info("start process")
-    logger.info(f"args: {kwargs}")
+    mlflow.set_experiment("sampling")
+    mlflow.start_run(run_name=kwargs["mlflow_run_name"])
+
+    # log cli options
+    logger.info(f"args: \n{kwargs}")
+    mlflow.log_params({f"args.{k}": v for k, v in kwargs.items()})
 
     # load dataset
     dataset = pickle.load(open(kwargs["input_filepath"], "rb"))
@@ -88,6 +103,8 @@ def main(**kwargs: Any) -> None:
     # save model and trace
     cloudpickle.dump((model, trace), open(kwargs["output_filepath"], "wb"))
 
+    # cleanup
+    mlflow.end_run()
     logger.info("complete")
 
 
