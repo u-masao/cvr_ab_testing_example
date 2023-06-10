@@ -4,7 +4,6 @@ import pickle
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-import arviz as az
 import click
 import cloudpickle
 import japanize_matplotlib  # noqa: F401
@@ -110,10 +109,12 @@ def plot_histogram_single(
 def plot_histogram_overlap(
     ax, p_a_true, p_b_true, burned_trace, cumulative=False
 ) -> None:
+    p_a = burned_trace.posterior["p"][:, :, 0].values.flatten()
+    p_b = burned_trace.posterior["p"][:, :, 1].values.flatten()
     plot_histogram_single(
         ax,
         p_a_true,
-        burned_trace["p_a"],
+        p_a,
         value_name="$p_a$",
         color_number=0,
         cumulative=cumulative,
@@ -121,7 +122,7 @@ def plot_histogram_overlap(
     plot_histogram_single(
         ax,
         p_b_true,
-        burned_trace["p_b"],
+        p_b,
         value_name="$p_b$",
         color_number=2,
         cumulative=cumulative,
@@ -134,6 +135,9 @@ def plot_histogram(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
     fig, axes = plt.subplots(5, 2, figsize=(16, 12))
     axes = axes.flatten()
 
+    p_a = trace.posterior["p"][:, :, 0].values.flatten()
+    p_b = trace.posterior["p"][:, :, 1].values.flatten()
+
     for offset, cumulative in enumerate([False, True]):
         options = {"cumulative": cumulative}
         plot_histogram_overlap(
@@ -142,7 +146,7 @@ def plot_histogram(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
         plot_histogram_single(
             axes[2 + offset],
             p_a_true,
-            trace["p_a"],
+            p_a,
             value_name="$p_a$",
             color_number=2,
             **options,
@@ -150,7 +154,7 @@ def plot_histogram(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
         plot_histogram_single(
             axes[4 + offset],
             p_b_true,
-            trace["p_b"],
+            p_b,
             value_name="$p_b$",
             color_number=4,
             **options,
@@ -158,7 +162,7 @@ def plot_histogram(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
         plot_histogram_single(
             axes[6 + offset],
             p_b_true - p_a_true,
-            trace["p_b"] - trace["p_a"],
+            p_b - p_a,
             value_name="$p_b - p_a$",
             color_number=6,
             **options,
@@ -166,7 +170,7 @@ def plot_histogram(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
         plot_histogram_single(
             axes[8 + offset],
             (p_b_true - p_a_true) / p_a_true,
-            (trace["p_b"] - trace["p_a"]) / trace["p_a"],
+            (p_b - p_a) / p_a,
             value_name="$(p_b - p_a) / p_a$",
             color_number=8,
             **options,
@@ -189,8 +193,8 @@ def plot_histogram(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
 def load_theta(filepath) -> Tuple:
     """load true parameters"""
     theta = pickle.load(open(filepath, "rb"))
-    p_a_true = theta["p_a"]
-    p_b_true = theta["p_b"]
+    p_a_true = theta["p_a_true"]
+    p_b_true = theta["p_b_true"]
     n_a = theta["n_a"]
     n_b = theta["n_b"]
     observations_a = theta["obs_a"]
@@ -247,8 +251,8 @@ def calc_prob_for_dicision(
     hdi_prob: float = 0.95,
 ) -> pd.DataFrame:
     # 評価対象を作成
-    p_a = trace["p_a"]
-    p_b = trace["p_b"]
+    p_a = trace.posterior["p"][:, :, 0].values.flatten()
+    p_b = trace.posterior["p"][:, :, 1].values.flatten()
     p_diff = p_b - p_a
     p_ratio = p_diff / p_a
 
