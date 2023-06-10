@@ -207,15 +207,15 @@ def load_theta(filepath) -> Tuple:
     return p_a_true, p_b_true, n_a, n_b, observations_a, observations_b
 
 
-def calc_ci(p, hdi_prob=0.95) -> Dict:
+def calc_ci(posterior, hdi_prob=0.95) -> Dict:
     # init log
     logger = logging.getLogger(__name__)
 
     # pickup sample
-    p_a = p[:, :, 0].values.flatten()
-    p_b = p[:, :, 1].values.flatten()
-    p_diff = p_b - p_a
-    p_ratio = p_diff / p_a
+    p_a = posterior["p"][:, :, 0].values.flatten()
+    p_b = posterior["p"][:, :, 1].values.flatten()
+    p_diff = posterior["uplift"].values.flatten()
+    p_ratio = posterior["relative_uplift"].values.flatten()
 
     # 確信区間を計算
     p_a_ci_low, p_a_ci_high = az.hdi(p_a, hdi_prob=hdi_prob)
@@ -349,7 +349,7 @@ def main(**kwargs: Any) -> None:
 
     # 確信区間を計算
     hdi_prob = 0.95
-    ci = calc_ci(trace.posterior["p"], hdi_prob=hdi_prob)
+    ci = calc_ci(trace.posterior, hdi_prob=hdi_prob)
     metrics.update(ci)
     logger.info(f"metrics: {metrics}")
 
