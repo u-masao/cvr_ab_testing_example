@@ -1,31 +1,32 @@
 stages:
-  make_dataset:
+  make_observed:
     cmd: >-
-      poetry run python -m src.data.make_dataset
-      data/interim/dataset.pickle
+      poetry run python -m src.data.make_observed
+      data/interim/observed.pickle
     deps:
-    - src/data/make_dataset.py
+    - src/data/make_observed.py
     outs:
-    - data/interim/dataset.pickle
+    - data/interim/observed.pickle
   sampling:
     cmd: >-
       poetry run python -m src.models.sampling
-      data/interim/dataset.pickle
+      data/interim/observed.pickle
       data/interim/model_and_trace.pickle
     deps:
     - src/models/sampling.py
-    - data/interim/dataset.pickle
+    - data/interim/observed.pickle
     outs:
     - data/interim/model_and_trace.pickle
   visualization:
     cmd: >-
       poetry run python -m src.visualization.visualize
       data/interim/model_and_trace.pickle
-      data/interim/dataset.pickle
+      data/interim/observed.pickle
       data/processed/result/
     deps:
     - src/visualization/visualize.py
+    - src/utils.py
     - data/interim/model_and_trace.pickle
-    - data/interim/dataset.pickle
+    - data/interim/observed.pickle
     outs:
     - data/processed/result/

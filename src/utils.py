@@ -1,22 +1,11 @@
 import os
-import pickle
 from pathlib import Path
-from typing import Any, Union
+from typing import Union
 
 import arviz as az
 import matplotlib as mpl
 import mlflow
 import pymc as pm
-
-
-def save_trace_and_model(
-    trace: Any, model: Any, model_path_string: str
-) -> None:
-    # save trace and model
-    save_path = Path(model_path_string)
-    os.makedirs(save_path.parent, exist_ok=True)
-    with open(save_path, "wb") as fo:
-        pickle.dump((trace, model), fo)
 
 
 def plot_trace(trace: az.InferenceData, model: pm.Model) -> mpl.figure.Figure:
