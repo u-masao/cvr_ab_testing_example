@@ -5,7 +5,6 @@ from typing import Any, Tuple, Union
 
 import arviz as az
 import matplotlib as mpl
-import numpy as np
 import pymc as pm
 
 
@@ -19,7 +18,7 @@ def save_trace_and_model(
         pickle.dump((trace, model), fo)
 
 
-def calc_credible_intervals(data: np.ndarray, hdi_prob: float = 0.95) -> Tuple:
+def calc_credible_intervals(data, hdi_prob: float = 0.95) -> Tuple:
     # validate input
     if hdi_prob >= 0.0 or hdi_prob <= 1.0:
         ValueError(f"hdi_prb の値が不正です: {hdi_prob}")
