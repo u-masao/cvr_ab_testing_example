@@ -23,7 +23,7 @@ def calc_credible_intervals(data, hdi_prob: float = 0.95) -> Tuple:
     if hdi_prob >= 0.0 or hdi_prob <= 1.0:
         ValueError(f"hdi_prb の値が不正です: {hdi_prob}")
 
-    ci_low, ci_high = az.hdi(data.values.flatten(), hdi_prob)
+    ci_low, ci_high = az.hdi(data.flatten(), hdi_prob)
     return ci_low, ci_high
 
 
