@@ -28,16 +28,16 @@ stages:
       data/interim/dataset.pickle data/processed/result/
     deps:
     - path: data/interim/dataset.pickle
-      md5: 54dac179544891f1d8ec4475800fd742
-      size: 18253
+      md5: d95d8d5e568790e7b031e867412eb257
+      size: 18263
     - path: data/interim/model_and_trace.pickle
-      md5: 05e7e51baf06a93959f91e392bc4c79f
+      md5: 7e1000963bb6f2eea24a9acfec634283
       size: 2609254
     - path: src/visualization/visualize.py
-      md5: 8c4ecd56d9086462d481363418b40434
-      size: 8791
+      md5: 044d179506d0255dc1818fe77f95fdd3
+      size: 9403
     outs:
     - path: data/processed/result/
-      md5: d751713988987e9331980363e24189ce.dir
-      size: 0
-      nfiles: 0
+      md5: 1cee3a030220a404f9e588b07ea70808.dir
+      size: 15217
+      nfiles: 2
