@@ -8,7 +8,10 @@ from scipy.stats import bernoulli
 
 def make_dataset(kwargs: Dict) -> Dict:
     results = {}
-    for n, p, obs in [["n_a", "p_a", "obs_a"], ["n_b", "p_b", "obs_b"]]:
+    for n, p, obs in [
+        ["n_a", "p_a_true", "obs_a"],
+        ["n_b", "p_b_true", "obs_b"],
+    ]:
         results[n] = kwargs[n]
         results[p] = kwargs[p]
         results[obs] = bernoulli.rvs(
@@ -22,8 +25,8 @@ def make_dataset(kwargs: Dict) -> Dict:
 @click.option("--random_state", type=int, default=1234)
 @click.option("--n_a", type=int, default=1500)
 @click.option("--n_b", type=int, default=750)
-@click.option("--p_a", type=float, default=0.04)
-@click.option("--p_b", type=float, default=0.05)
+@click.option("--p_a_true", type=float, default=0.04)
+@click.option("--p_b_true", type=float, default=0.05)
 def main(**kwargs: Any) -> None:
     """メイン処理"""
     logger = logging.getLogger(__name__)
