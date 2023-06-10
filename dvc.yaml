@@ -13,7 +13,7 @@ stages:
       data/interim/observed.pickle
       data/interim/model_and_trace.pickle
       --n_tune=0
-      --n_sampling=1000
+      --n_sampling=10000
       --n_chains=2
     deps:
     - src/models/sampling.py
