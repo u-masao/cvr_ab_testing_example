@@ -269,33 +269,36 @@ def calc_prob_for_dicision(
     return pd.concat(results)
 
 
+def save_csv_and_log_artifact(df, path):
+    df.to_csv(path)
+    mlflow.log_artifact(path)
+
+
 def output_results(
     p_a_true, p_b_true, model, trace, metrics, prob_summary_df, kwargs
 ) -> None:
     """結果を出力する"""
-
-    # init log
-    logger = logging.getLogger(__name__)
 
     # make dirs
     os.makedirs(kwargs["csv_output_dir"], exist_ok=True)
     os.makedirs(kwargs["figure_dir"], exist_ok=True)
 
     # 指標を出力
-    logger.info(f"metrics: {metrics}")
-    pd.DataFrame(metrics).to_csv(
-        Path(kwargs["csv_output_dir"]) / "metrics.csv"
+    save_csv_and_log_artifact(
+        pd.DataFrame(metrics), Path(kwargs["csv_output_dir"]) / "metrics.csv"
     )
 
     # 意思決定に利用する確率を出力
-    prob_summary_df.to_csv(
-        Path(kwargs["csv_output_dir"]) / "prob_for_dicision.csv"
+    save_csv_and_log_artifact(
+        prob_summary_df,
+        Path(kwargs["csv_output_dir"]) / "prob_for_dicision.csv",
     )
 
     # 各 chain のトレースプロットを出力
     savefig(
         plot_trace(trace, model),
         Path(kwargs["figure_dir"]) / "traceplot.png",
+        mlflow_log_artifact=True,
     )
 
     # サンプルの分布を出力
@@ -306,6 +309,7 @@ def output_results(
             trace,
         ),
         Path(kwargs["figure_dir"]) / "distribution.png",
+        mlflow_log_artifact=True,
     )
 
 
@@ -347,6 +351,7 @@ def main(**kwargs: Any) -> None:
     hdi_prob = 0.95
     ci = calc_ci(trace.posterior["p"], hdi_prob=hdi_prob)
     metrics.update(ci)
+    logger.info(f"metrics: {metrics}")
 
     # 意思決定に利用する確率などの計算
     prob_summary_df = calc_prob_for_dicision(

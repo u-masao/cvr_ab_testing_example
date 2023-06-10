@@ -5,6 +5,7 @@ from typing import Any, Union
 
 import arviz as az
 import matplotlib as mpl
+import mlflow
 import pymc as pm
 
 
@@ -31,7 +32,9 @@ def plot_trace(trace: az.InferenceData, model: pm.Model) -> mpl.figure.Figure:
 
 
 def savefig(
-    fig: mpl.figure.Figure, save_path_string: Union[str, Path]
+    fig: mpl.figure.Figure,
+    save_path_string: Union[str, Path],
+    mlflow_log_artifact: bool = False,
 ) -> None:
     """
     figure を保存する
@@ -39,3 +42,5 @@ def savefig(
     save_path = Path(save_path_string)
     os.makedirs(save_path.parent, exist_ok=True)
     fig.savefig(save_path)
+    if mlflow_log_artifact:
+        mlflow.log_artifact(save_path)
