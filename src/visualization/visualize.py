@@ -4,6 +4,7 @@ import pickle
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+import arviz as az
 import click
 import cloudpickle
 import japanize_matplotlib  # noqa: F401
@@ -12,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from src.utils import calc_credible_intervals, plot_trace, savefig
+from src.utils import plot_trace, savefig
 
 
 def calc_summary_of_obs_and_true(observations: List, p_true: float) -> Dict:
@@ -50,7 +51,7 @@ def plot_histogram_single(
         color = plt.get_cmap("Dark2")(int(np.random.rand() * 10))
 
     # 確信区間を計算
-    ci_low, ci_high = calc_credible_intervals(sample, hdi_prob=hdi_prob)
+    ci_low, ci_high = az.hdi(sample, hdi_prob=hdi_prob)
 
     # タイトルを指定
     ax.set_title(f"{value_name} の分布")
@@ -213,14 +214,10 @@ def calc_ci(p, hdi_prob=0.95) -> Dict:
     p_ratio = p_diff / p_a
 
     # 確信区間を計算
-    p_a_ci_low, p_a_ci_high = calc_credible_intervals(p_a, hdi_prob=hdi_prob)
-    p_b_ci_low, p_b_ci_high = calc_credible_intervals(p_b, hdi_prob=hdi_prob)
-    p_diff_ci_low, p_diff_ci_high = calc_credible_intervals(
-        p_diff, hdi_prob=hdi_prob
-    )
-    p_ratio_ci_low, p_ratio_ci_high = calc_credible_intervals(
-        p_ratio, hdi_prob=hdi_prob
-    )
+    p_a_ci_low, p_a_ci_high = az.hdi(p_a, hdi_prob=hdi_prob)
+    p_b_ci_low, p_b_ci_high = az.hdi(p_b, hdi_prob=hdi_prob)
+    p_diff_ci_low, p_diff_ci_high = az.hdi(p_diff, hdi_prob=hdi_prob)
+    p_ratio_ci_low, p_ratio_ci_high = az.hdi(p_ratio, hdi_prob=hdi_prob)
     ci = {
         "p_a": {"ci_low": p_a_ci_low, "ci_high": p_a_ci_high},
         "p_b": {"ci_low": p_b_ci_low, "ci_high": p_b_ci_high},
@@ -235,7 +232,7 @@ def calc_prob_dist(samples, hdi_prob=0.95, divide=100) -> pd.DataFrame:
     """
     累積分布を計算
     """
-    ci_low, ci_high = calc_credible_intervals(samples, hdi_prob=hdi_prob)
+    ci_low, ci_high = az.hdi(samples, hdi_prob=hdi_prob)
     values = np.linspace(ci_low, ci_high, divide)
     prob = [(samples < x).mean() for x in values]
     return pd.DataFrame({"value": values, "prob": prob})
