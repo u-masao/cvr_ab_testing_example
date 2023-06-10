@@ -12,9 +12,9 @@ stages:
       poetry run python -m src.models.sampling
       data/interim/observed.pickle
       data/interim/model_and_trace.pickle
-      --n_tune=500
-      --n_sampling=1000
-      --n_chains=2
+      --n_tune=1000
+      --n_sampling=2000
+      --n_chains=4
     deps:
     - src/models/sampling.py
     - data/interim/observed.pickle
