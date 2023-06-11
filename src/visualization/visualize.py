@@ -111,7 +111,7 @@ def calc_metrics(
     # log ci
     for key, value in ci_dict.items():
         for sub_key, sub_value in value.items():
-            mlflow.log_param(f"{key}.{sub_key}", sub_value)
+            mlflow.log_metric(f"{key}.{sub_key}", sub_value)
 
     return metrics
 
