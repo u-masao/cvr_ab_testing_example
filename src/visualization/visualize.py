@@ -337,6 +337,15 @@ def output_results(
         mlflow_log_artifact=True,
     )
 
+    # プロット
+    savefig(
+        make_fig_from_axes(
+            az.plot_dist(trace),
+        ),
+        Path(kwargs["figure_dir"]) / "distribution_with_obs.png",
+        mlflow_log_artifact=True,
+    )
+
     # forest を出力
     savefig(
         make_fig_from_axes(
