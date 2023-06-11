@@ -192,7 +192,7 @@ def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
             **options,
         )
         axes[2 + offset].plot(
-            metrics["obs_a"]["obs_mean"], 0, marker="x", label="obs_mean"
+            metrics["obs_a"]["obs_mean"], 0, marker="x", label="観測値の平均値"
         )
         plot_histogram_single(
             axes[4 + offset],
@@ -203,7 +203,7 @@ def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
             **options,
         )
         axes[4 + offset].plot(
-            metrics["obs_b"]["obs_mean"], 0, marker="x", label="obs_mean"
+            metrics["obs_b"]["obs_mean"], 0, marker="x", label="観測値の平均値"
         )
         plot_histogram_single(
             axes[6 + offset],
@@ -213,6 +213,12 @@ def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
             color_number=6,
             **options,
         )
+        axes[6 + offset].plot(
+            metrics["obs_compare"]["obs_mean_uplift"],
+            0,
+            marker="x",
+            label="観測値の平均値",
+        )
         plot_histogram_single(
             axes[8 + offset],
             (p_b_true - p_a_true) / p_a_true,
@@ -220,6 +226,12 @@ def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
             value_name="$(p_b - p_a) / p_a$",
             color_number=8,
             **options,
+        )
+        axes[8 + offset].plot(
+            metrics["obs_compare"]["obs_mean_relative_uplift"],
+            0,
+            marker="x",
+            label="観測値の平均値",
         )
 
     # 軸のスケールを一致
