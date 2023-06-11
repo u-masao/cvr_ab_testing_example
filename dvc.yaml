@@ -39,7 +39,7 @@ stages:
       cmd: >-
         poetry run python -m src.models.sampling
         data/interim/observed.pickle
-        data/interim/model_and_trace.pickle
+        models/explore/model_and_trace_${key}.pickle
         --random_seed=${item.random_seed}
         --n_sampling=2000
         --n_tune=1000
