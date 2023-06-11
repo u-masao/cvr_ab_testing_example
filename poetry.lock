@@ -886,6 +886,19 @@ pyparsing = "*"
 full = ["numpy", "ply"]
 
 [[package]]
+name = "graphviz"
+version = "0.20.1"
+description = "Simple Python interface for Graphviz"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+dev = ["tox (>=3)", "flake8", "pep8-naming", "wheel", "twine"]
+docs = ["sphinx (>=5)", "sphinx-autodoc-typehints", "sphinx-rtd-theme"]
+test = ["pytest (>=7)", "pytest-mock (>=3)", "mock (>=4)", "pytest-cov", "coverage"]
+
+[[package]]
 name = "greenlet"
 version = "2.0.2"
 description = "Lightweight in-process concurrent programming"
@@ -2122,7 +2135,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-co
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "92437eafba5da791e5abfc3ac9ab706fb12c0d74a67f080fd63f449b0a686efc"
+content-hash = "ca5b940b166fbfc9c763d82676705fdeeea1463a5a8ac078dc3bb69c0c8464dc"
 
 [metadata.files]
 aiohttp = []
@@ -2274,6 +2287,7 @@ funcy = []
 gitdb = []
 gitpython = []
 grandalf = []
+graphviz = []
 greenlet = []
 gunicorn = [
     {file = "gunicorn-20.1.0-py3-none-any.whl", hash = "sha256:9dcc4547dbb1cb284accfb15ab5667a0e5d1881cc443e0677b4882a4067a807e"},
