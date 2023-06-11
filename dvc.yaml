@@ -68,11 +68,12 @@ stages:
         poetry run python -m src.visualization.visualize
         models/explore/model_and_trace_${key}.pickle
         data/interim/observed_${key}.pickle
-        data/processed/explore/explore_${key}/
+        data/processed/explore/${key}/
+        --figure_dir=reports/figures/explore/${key}/
       deps:
       - src/visualization/visualize.py
       - src/utils.py
       - models/explore/model_and_trace_${key}.pickle
       - data/interim/observed_${key}.pickle
       outs:
-      - data/processed/explore/explore_${key}/
+      - data/processed/explore/${key}/
