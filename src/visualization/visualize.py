@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import pymc as pm
 
-from src.utils import plot_trace, savefig
+from src.utils import make_fig_from_axes, plot_trace, savefig
 
 
 def calc_summary_of_obs_and_true(observations: List, p_true: float) -> Dict:
@@ -328,7 +328,11 @@ def output_results(
 
     # forest を出力
     savefig(
-        az.plot_forest(trace, combined=True, hdi_prob=hdi_prob, r_hat=True),
+        make_fig_from_axes(
+            az.plot_forest(
+                trace, combined=True, hdi_prob=hdi_prob, r_hat=True
+            ),
+        ),
         Path(kwargs["figure_dir"]) / "forest.png",
         mlflow_log_artifact=True,
     )

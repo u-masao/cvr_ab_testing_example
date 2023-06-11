@@ -12,11 +12,16 @@ def plot_trace(trace: az.InferenceData, model: pm.Model) -> mpl.figure.Figure:
     # save trace plot
     with model:
         axes = pm.plot_trace(trace, compact=False, combined=False)
-        for ax in axes.flatten():
-            ax.grid()
-        fig = axes.ravel()[0].figure
-        fig.tight_layout()
-        fig.suptitle("trace plot")
+    fig = make_fig_from_axes(axes)
+    fig.suptitle("trace plot")
+    return fig
+
+
+def make_fig_from_axes(axes) -> mpl.figure.Figure:
+    for ax in axes.flatten():
+        ax.grid()
+    fig = axes.ravel()[0].figure
+    fig.tight_layout()
     return fig
 
 
