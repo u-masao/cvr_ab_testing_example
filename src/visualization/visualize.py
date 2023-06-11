@@ -397,7 +397,11 @@ def output_results(
     savefig(
         make_fig_from_axes(
             az.plot_forest(
-                trace, combined=False, hdi_prob=hdi_prob, r_hat=True
+                trace,
+                var_names=["p"],
+                combined=True,
+                hdi_prob=hdi_prob,
+                r_hat=True,
             ),
         ),
         Path(kwargs["figure_dir"]) / "forest.png",
