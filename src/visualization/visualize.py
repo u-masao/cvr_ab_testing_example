@@ -18,6 +18,39 @@ import pymc as pm
 from src.utils import make_fig_from_axes, savefig
 
 
+def calc_metrics(
+    observations_a,
+    observations_b,
+    p_a_true,
+    p_b_true,
+    trace,
+    hdi_prob,
+) -> Dict:
+    # init log
+    logger = logging.getLogger(__name__)
+
+    # init variable
+    metrics = {}
+
+    # calc metrics
+    metrics["obs_a"] = calc_summary_of_obs_and_true(observations_a, p_a_true)
+    metrics["obs_b"] = calc_summary_of_obs_and_true(observations_b, p_b_true)
+    metrics["obs_compare"] = {
+        "obs_mean_uplift": metrics["obs_b"]["obs_mean"]
+        - metrics["obs_a"]["obs_mean"],
+        "obs_mean_relative_uplift": (
+            metrics["obs_b"]["obs_mean"] - metrics["obs_a"]["obs_mean"]
+        )
+        / metrics["obs_a"]["obs_mean"],
+    }
+
+    # 確信区間を計算
+    metrics.update(calc_ci(trace.posterior, hdi_prob=hdi_prob))
+    logger.info(f"metrics: {metrics}")
+
+    return metrics
+
+
 def calc_summary_of_obs_and_true(observations: List, p_true: float) -> Dict:
     """
     観測値のサマリーと真値との違いを計算
@@ -28,6 +61,7 @@ def calc_summary_of_obs_and_true(observations: List, p_true: float) -> Dict:
         "obs_len": len(observations),
         "obs_sum": np.sum(observations),
         "obs_mean": np.mean(observations),
+        "obs_std": np.std(observations, ddof=1),
         "obs_mean - p_true:": np.mean(observations) - p_true,
         "(obs_mean - p_true) / p_true:": (np.mean(observations) - p_true)
         / p_true,
@@ -337,17 +371,6 @@ def output_results(
         mlflow_log_artifact=True,
     )
 
-    # プロット
-    with model:
-        prior_samples = pm.sample_prior_predictive(1000)
-    savefig(
-        make_fig_from_axes(
-            az.plot_dist(prior_samples.prior_predictive["relative_uplift"]),
-        ),
-        Path(kwargs["figure_dir"]) / "distribution_with_obs.png",
-        mlflow_log_artifact=True,
-    )
-
     # forest を出力
     savefig(
         make_fig_from_axes(
@@ -374,6 +397,7 @@ def output_results(
     "--figure_dir", type=click.Path(), default="reports/figures/cvr/"
 )
 @click.option("--mlflow_run_name", type=str, default="develop")
+@click.option("--hdi_prob", type=float, default=0.95)
 def main(**kwargs: Any) -> None:
     """
     メイン処理
@@ -389,6 +413,9 @@ def main(**kwargs: Any) -> None:
     logger.info(f"args: \n{kwargs}")
     mlflow.log_params({f"args.{k}": v for k, v in kwargs.items()})
 
+    # set param
+    hdi_prob = kwargs["hdi_prob"]
+
     # load model, trace, theta
     model, trace = cloudpickle.load(open(kwargs["model_filepath"], "rb"))
     p_a_true, p_b_true, n_a, n_b, observations_a, observations_b = load_theta(
@@ -396,15 +423,14 @@ def main(**kwargs: Any) -> None:
     )
 
     # 指標を計算
-    metrics = {}
-    metrics["obs_a"] = calc_summary_of_obs_and_true(observations_a, p_a_true)
-    metrics["obs_b"] = calc_summary_of_obs_and_true(observations_b, p_b_true)
-
-    # 確信区間を計算
-    hdi_prob = 0.95
-    ci = calc_ci(trace.posterior, hdi_prob=hdi_prob)
-    metrics.update(ci)
-    logger.info(f"metrics: {metrics}")
+    metrics = calc_metrics(
+        observations_a,
+        observations_b,
+        p_a_true,
+        p_b_true,
+        trace,
+        hdi_prob,
+    )
 
     # 意思決定に利用する確率などの計算
     prob_summary_df = calc_prob_for_dicision(
