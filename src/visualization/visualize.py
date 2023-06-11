@@ -170,7 +170,7 @@ def plot_histogram_overlap(
     ax.set_title("$p_a$ と $p_b$ の分布")
 
 
-def plot_distribution(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
+def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
     """plot histogram"""
     fig, axes = plt.subplots(5, 2, figsize=(16, 12))
     axes = axes.flatten()
@@ -191,6 +191,9 @@ def plot_distribution(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
             color_number=2,
             **options,
         )
+        axes[2 + offset].plot(
+            metrics["obs_a"]["obs_mean"], marker="x", label="obs_mean"
+        )
         plot_histogram_single(
             axes[4 + offset],
             p_b_true,
@@ -198,6 +201,9 @@ def plot_distribution(p_a_true, p_b_true, trace) -> mpl.figure.Figure:
             value_name="$p_b$",
             color_number=4,
             **options,
+        )
+        axes[4 + offset].plot(
+            metrics["obs_b"]["obs_mean"], marker="x", label="obs_mean"
         )
         plot_histogram_single(
             axes[6 + offset],
@@ -286,6 +292,9 @@ def calc_prob_for_dicision(
     observations_b: List,
     hdi_prob: float = 0.95,
 ) -> pd.DataFrame:
+    """
+    意思決定に有用と考えられるデータフレームを作成
+    """
     # 評価対象を作成
     p_a = trace.posterior["p"][:, :, 0].values.flatten()
     p_b = trace.posterior["p"][:, :, 1].values.flatten()
@@ -357,6 +366,7 @@ def output_results(
             p_a_true,
             p_b_true,
             trace,
+            metrics,
         ),
         Path(kwargs["figure_dir"]) / "distribution.png",
         mlflow_log_artifact=True,
