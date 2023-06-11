@@ -394,7 +394,7 @@ def output_results(
     )
 
     # forest を出力
-    for var_name in ["p", "uplift", "relative_uplift"]:
+    for var_name in trace.posterior.data_vars.keys():
         savefig(
             make_fig_from_axes(
                 az.plot_forest(
