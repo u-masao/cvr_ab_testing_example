@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
 import pandas as pd
+import pymc as pm
 
 from src.utils import plot_trace, savefig
 
@@ -275,7 +276,14 @@ def save_csv_and_log_artifact(df, path):
 
 
 def output_results(
-    p_a_true, p_b_true, model, trace, metrics, prob_summary_df, kwargs
+    p_a_true,
+    p_b_true,
+    model,
+    trace,
+    metrics,
+    hdi_prob,
+    prob_summary_df,
+    kwargs,
 ) -> None:
     """結果を出力する"""
 
@@ -286,6 +294,12 @@ def output_results(
     # 指標を出力
     save_csv_and_log_artifact(
         pd.DataFrame(metrics), Path(kwargs["csv_output_dir"]) / "metrics.csv"
+    )
+
+    # summary を出力
+    save_csv_and_log_artifact(
+        az.summary(trace, round_to=2),
+        Path(kwargs["csv_output_dir"]) / "sampling_summary.csv",
     )
 
     # 意思決定に利用する確率を出力
@@ -311,6 +325,26 @@ def output_results(
         Path(kwargs["figure_dir"]) / "distribution.png",
         mlflow_log_artifact=True,
     )
+
+    # energy を出力
+    savefig(
+        az.plot_energy(trace),
+        Path(kwargs["figure_dir"]) / "energy.png",
+        mlflow_log_artifact=True,
+    )
+
+    # forest を出力
+    savefig(
+        az.plot_forest(trace, combined=True, hdi_prob=hdi_prob, r_hat=True),
+        Path(kwargs["figure_dir"]) / "forest.png",
+        mlflow_log_artifact=True,
+    )
+
+    # DAG を出力
+    graph = pm.model_to_graphviz(model)
+    dag_filepath = Path(kwargs["figure_dir"]) / "dag"
+    graph.render(filename=dag_filepath, format="png", cleanup=True)
+    mlflow.log_artifact(f"{dag_filepath}.png")
 
 
 @click.command()
@@ -360,7 +394,14 @@ def main(**kwargs: Any) -> None:
 
     # 結果を出力
     output_results(
-        p_a_true, p_b_true, model, trace, metrics, prob_summary_df, kwargs
+        p_a_true,
+        p_b_true,
+        model,
+        trace,
+        metrics,
+        hdi_prob,
+        prob_summary_df,
+        kwargs,
     )
 
     # cleanup
