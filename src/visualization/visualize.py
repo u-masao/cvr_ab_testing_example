@@ -338,9 +338,11 @@ def output_results(
     )
 
     # プロット
+    with model:
+        prior_samples = pm.sample_prior_predictive(1000)
     savefig(
         make_fig_from_axes(
-            az.plot_dist(trace.prior_predictive["relative_uplift"]),
+            az.plot_dist(prior_samples.prior_predictive["relative_uplift"]),
         ),
         Path(kwargs["figure_dir"]) / "distribution_with_obs.png",
         mlflow_log_artifact=True,
