@@ -11,7 +11,7 @@ stages:
     cmd: >-
       poetry run python -m src.models.sampling
       data/interim/observed.pickle
-      data/interim/model_and_trace.pickle
+      models/model_and_trace.pickle
       --n_tune=1000
       --n_sampling=2000
       --n_chains=4
@@ -19,17 +19,17 @@ stages:
     - src/models/sampling.py
     - data/interim/observed.pickle
     outs:
-    - data/interim/model_and_trace.pickle
+    - models/model_and_trace.pickle
   visualization:
     cmd: >-
       poetry run python -m src.visualization.visualize
-      data/interim/model_and_trace.pickle
+      models/model_and_trace.pickle
       data/interim/observed.pickle
       data/processed/result/
     deps:
     - src/visualization/visualize.py
     - src/utils.py
-    - data/interim/model_and_trace.pickle
+    - models/model_and_trace.pickle
     - data/interim/observed.pickle
     outs:
     - data/processed/result/
