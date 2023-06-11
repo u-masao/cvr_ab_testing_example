@@ -1,5 +1,7 @@
 import logging
+import os
 import pickle
+from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import click
@@ -101,7 +103,9 @@ def main(**kwargs: Any) -> None:
     model, trace = sampling(model, kwargs)
 
     # save model and trace
-    cloudpickle.dump((model, trace), open(kwargs["output_filepath"], "wb"))
+    output_filepath = Path(kwargs["output_filepath"])
+    os.makedirs(output_filepath.parent, exist_ok=True)
+    cloudpickle.dump((model, trace), open(output_filepath, "wb"))
 
     # cleanup
     mlflow.end_run()
