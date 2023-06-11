@@ -343,13 +343,6 @@ def output_results(
     graph.render(filename=dag_filepath, format="png", cleanup=True)
     mlflow.log_artifact(f"{dag_filepath}.png")
 
-    # energy を出力
-    savefig(
-        az.plot_energy(trace),
-        Path(kwargs["figure_dir"]) / "energy.png",
-        mlflow_log_artifact=True,
-    )
-
 
 @click.command()
 @click.argument("model_filepath", type=click.Path(exists=True))
