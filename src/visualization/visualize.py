@@ -387,7 +387,7 @@ def output_results(
     # 事後分布を出力
     savefig(
         make_fig_from_axes(
-            az.plot_posterior(trace, hdi_prob=hdi_prob),
+            az.plot_posterior(trace, hdi_prob=hdi_prob).reshape(2, -1),
         ),
         Path(kwargs["figure_dir"]) / "posterior.png",
         mlflow_log_artifact=True,
