@@ -338,6 +338,7 @@ def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
 
 def save_csv_and_log_artifact(df: pd.DataFrame, path) -> None:
     df.to_csv(path)
+    mlflow.log_artifact(path)
     mlflow.log_table(data=df, artifact_file=f"{path}.json")
 
 
