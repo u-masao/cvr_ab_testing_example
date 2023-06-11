@@ -12,7 +12,7 @@ stages:
       size: 18263
   sampling:
     cmd: poetry run python -m src.models.sampling data/interim/observed.pickle models/model_and_trace.pickle
-      --n_tune=2000 --n_sampling=4000 --n_chains=4
+      --random_seed=1000 --n_sampling=4000 --n_tune=2000 --n_chains=4
     deps:
     - path: data/interim/observed.pickle
       md5: d95d8d5e568790e7b031e867412eb257
@@ -22,8 +22,8 @@ stages:
       size: 3166
     outs:
     - path: models/model_and_trace.pickle
-      md5: 1a020fb1058a5ceead6c13e79690a23b
-      size: 1013141
+      md5: f4a2c4fcd041a88e61a2fd2bb38eb068
+      size: 1013142
   visualization:
     cmd: poetry run python -m src.visualization.visualize models/model_and_trace.pickle
       data/interim/observed.pickle data/processed/result/
@@ -32,8 +32,8 @@ stages:
       md5: d95d8d5e568790e7b031e867412eb257
       size: 18263
     - path: models/model_and_trace.pickle
-      md5: 1a020fb1058a5ceead6c13e79690a23b
-      size: 1013141
+      md5: f4a2c4fcd041a88e61a2fd2bb38eb068
+      size: 1013142
     - path: src/utils.py
       md5: 92cc1864852648a9cbe0d446d328e2cd
       size: 934
@@ -42,8 +42,8 @@ stages:
       size: 13661
     outs:
     - path: data/processed/result/
-      md5: d69961f8a18fef3d6acb29377b68c743.dir
-      size: 16969
+      md5: 16a968553da7679810fa98f9649758cb.dir
+      size: 17016
       nfiles: 3
   make_observed:
     cmd: poetry run python -m src.data.make_observed data/interim/observed.pickle
