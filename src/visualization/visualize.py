@@ -342,6 +342,9 @@ def output_results(
 ) -> None:
     """結果を出力する"""
 
+    # init log
+    logger = logging.getLogger(__name__)
+
     # make dirs
     os.makedirs(kwargs["csv_output_dir"], exist_ok=True)
     os.makedirs(kwargs["figure_dir"], exist_ok=True)
@@ -394,16 +397,16 @@ def output_results(
     )
 
     # forest を出力
+    axes = az.plot_forest(
+        trace,
+        var_names=["p"],
+        combined=True,
+        hdi_prob=hdi_prob,
+        r_hat=True,
+    )
+    logger.info(axes.shape)
     savefig(
-        make_fig_from_axes(
-            az.plot_forest(
-                trace,
-                var_names=["p"],
-                combined=True,
-                hdi_prob=hdi_prob,
-                r_hat=True,
-            ),
-        ),
+        make_fig_from_axes(axes),
         Path(kwargs["figure_dir"]) / "forest.png",
         mlflow_log_artifact=True,
     )
