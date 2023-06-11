@@ -1,0 +1,7 @@
+explore:
+  seed_1000:
+    random_seed: 1000
+  seed_1001:
+    random_seed: 1001
+  seed_1002:
+    random_seed: 1002
