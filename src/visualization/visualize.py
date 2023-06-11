@@ -298,7 +298,7 @@ def output_results(
 
     # summary を出力
     save_csv_and_log_artifact(
-        az.summary(trace, round_to=2),
+        az.summary(trace, round_to=3),
         Path(kwargs["csv_output_dir"]) / "sampling_summary.csv",
     )
 
