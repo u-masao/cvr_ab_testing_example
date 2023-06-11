@@ -18,6 +18,65 @@ import pymc as pm
 from src.utils import make_fig_from_axes, savefig
 
 
+def load_theta(filepath) -> Tuple:
+    """load true parameters"""
+    theta = pickle.load(open(filepath, "rb"))
+    p_a_true = theta["p_a_true"]
+    p_b_true = theta["p_b_true"]
+    n_a = theta["n_a"]
+    n_b = theta["n_b"]
+    observations_a = theta["obs_a"]
+    observations_b = theta["obs_b"]
+    return p_a_true, p_b_true, n_a, n_b, observations_a, observations_b
+
+
+def calc_ci(posterior, hdi_prob=0.95) -> Dict:
+    # init log
+    logger = logging.getLogger(__name__)
+
+    # pickup sample
+    p_a = posterior["p"][:, :, 0].values.flatten()
+    p_b = posterior["p"][:, :, 1].values.flatten()
+    uplift = posterior["uplift"].values.flatten()
+    relative_uplift = posterior["relative_uplift"].values.flatten()
+
+    # 確信区間を計算
+    p_a_ci_low, p_a_ci_high = az.hdi(p_a, hdi_prob=hdi_prob)
+    p_b_ci_low, p_b_ci_high = az.hdi(p_b, hdi_prob=hdi_prob)
+    uplift_ci_low, uplift_ci_high = az.hdi(uplift, hdi_prob=hdi_prob)
+    relative_uplift_ci_low, relative_uplift_ci_high = az.hdi(
+        relative_uplift, hdi_prob=hdi_prob
+    )
+    ci = {
+        "p_a": {"ci_low": p_a_ci_low, "ci_high": p_a_ci_high},
+        "p_b": {"ci_low": p_b_ci_low, "ci_high": p_b_ci_high},
+        "uplift": {"ci_low": uplift_ci_low, "ci_high": uplift_ci_high},
+        "relative_uplift": {
+            "ci_low": relative_uplift_ci_low,
+            "ci_high": relative_uplift_ci_high,
+        },
+    }
+    logger.info(f"確信区間: {ci}")
+    return ci
+
+
+def calc_summary_of_obs_and_true(observations: List, p_true: float) -> Dict:
+    """
+    観測値のサマリーと真値との違いを計算
+    """
+    disp_length = np.min([20, len(observations)])
+    return {
+        "obs": observations[:disp_length],
+        "obs_len": len(observations),
+        "obs_sum": np.sum(observations),
+        "obs_mean": np.mean(observations),
+        "obs_std": np.std(observations, ddof=1),
+        "obs_mean - p_true:": np.mean(observations) - p_true,
+        "(obs_mean - p_true) / p_true:": (np.mean(observations) - p_true)
+        / p_true,
+    }
+
+
 def calc_metrics(
     observations_a,
     observations_b,
@@ -51,21 +110,44 @@ def calc_metrics(
     return metrics
 
 
-def calc_summary_of_obs_and_true(observations: List, p_true: float) -> Dict:
+def calc_prob_dist(samples, hdi_prob=0.95, divide=100) -> pd.DataFrame:
     """
-    観測値のサマリーと真値との違いを計算
+    累積分布を計算
     """
-    disp_length = np.min([20, len(observations)])
-    return {
-        "obs": observations[:disp_length],
-        "obs_len": len(observations),
-        "obs_sum": np.sum(observations),
-        "obs_mean": np.mean(observations),
-        "obs_std": np.std(observations, ddof=1),
-        "obs_mean - p_true:": np.mean(observations) - p_true,
-        "(obs_mean - p_true) / p_true:": (np.mean(observations) - p_true)
-        / p_true,
-    }
+    ci_low, ci_high = az.hdi(samples, hdi_prob=hdi_prob)
+    values = np.linspace(ci_low, ci_high, divide)
+    prob = [(samples < x).mean() for x in values]
+    return pd.DataFrame({"value": values, "prob": prob})
+
+
+def calc_prob_for_dicision(
+    trace,
+    model,
+    p_a_true: float,
+    p_b_true: float,
+    observations_a: List,
+    observations_b: List,
+    hdi_prob: float = 0.95,
+) -> pd.DataFrame:
+    """
+    意思決定に有用と考えられるデータフレームを作成
+    """
+    # 評価対象を作成
+    p_a = trace.posterior["p"][:, :, 0].values.flatten()
+    p_b = trace.posterior["p"][:, :, 1].values.flatten()
+    uplift = trace.posterior["uplift"].values.flatten()
+    relative_uplift = trace.posterior["relative_uplift"].values.flatten()
+
+    # 差と確率
+    results = []
+    for value, name in [
+        [p_a, "p_a"],
+        [p_b, "p_b"],
+        [uplift, "uplift"],
+        [relative_uplift, "relative_uplift"],
+    ]:
+        results.append(calc_prob_dist(value).assign(name=name))
+    return pd.concat(results)
 
 
 def plot_histogram_single(
@@ -246,83 +328,6 @@ def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
     fig.suptitle("$p_A$ と $p_B$ の事後分布と真の値")
     fig.tight_layout()
     return fig
-
-
-def load_theta(filepath) -> Tuple:
-    """load true parameters"""
-    theta = pickle.load(open(filepath, "rb"))
-    p_a_true = theta["p_a_true"]
-    p_b_true = theta["p_b_true"]
-    n_a = theta["n_a"]
-    n_b = theta["n_b"]
-    observations_a = theta["obs_a"]
-    observations_b = theta["obs_b"]
-    return p_a_true, p_b_true, n_a, n_b, observations_a, observations_b
-
-
-def calc_ci(posterior, hdi_prob=0.95) -> Dict:
-    # init log
-    logger = logging.getLogger(__name__)
-
-    # pickup sample
-    p_a = posterior["p"][:, :, 0].values.flatten()
-    p_b = posterior["p"][:, :, 1].values.flatten()
-    p_diff = posterior["uplift"].values.flatten()
-    p_ratio = posterior["relative_uplift"].values.flatten()
-
-    # 確信区間を計算
-    p_a_ci_low, p_a_ci_high = az.hdi(p_a, hdi_prob=hdi_prob)
-    p_b_ci_low, p_b_ci_high = az.hdi(p_b, hdi_prob=hdi_prob)
-    p_diff_ci_low, p_diff_ci_high = az.hdi(p_diff, hdi_prob=hdi_prob)
-    p_ratio_ci_low, p_ratio_ci_high = az.hdi(p_ratio, hdi_prob=hdi_prob)
-    ci = {
-        "p_a": {"ci_low": p_a_ci_low, "ci_high": p_a_ci_high},
-        "p_b": {"ci_low": p_b_ci_low, "ci_high": p_b_ci_high},
-        "p_diff": {"ci_low": p_diff_ci_low, "ci_high": p_diff_ci_high},
-        "p_ratio": {"ci_low": p_ratio_ci_low, "ci_high": p_ratio_ci_high},
-    }
-    logger.info(f"確信区間: {ci}")
-    return ci
-
-
-def calc_prob_dist(samples, hdi_prob=0.95, divide=100) -> pd.DataFrame:
-    """
-    累積分布を計算
-    """
-    ci_low, ci_high = az.hdi(samples, hdi_prob=hdi_prob)
-    values = np.linspace(ci_low, ci_high, divide)
-    prob = [(samples < x).mean() for x in values]
-    return pd.DataFrame({"value": values, "prob": prob})
-
-
-def calc_prob_for_dicision(
-    trace,
-    model,
-    p_a_true: float,
-    p_b_true: float,
-    observations_a: List,
-    observations_b: List,
-    hdi_prob: float = 0.95,
-) -> pd.DataFrame:
-    """
-    意思決定に有用と考えられるデータフレームを作成
-    """
-    # 評価対象を作成
-    p_a = trace.posterior["p"][:, :, 0].values.flatten()
-    p_b = trace.posterior["p"][:, :, 1].values.flatten()
-    p_diff = p_b - p_a
-    p_ratio = p_diff / p_a
-
-    # 差と確率
-    results = []
-    for value, name in [
-        [p_a, "p_a"],
-        [p_b, "p_b"],
-        [p_diff, "p_diff"],
-        [p_ratio, "p_ratio"],
-    ]:
-        results.append(calc_prob_dist(value).assign(name=name))
-    return pd.concat(results)
 
 
 def save_csv_and_log_artifact(df, path):
