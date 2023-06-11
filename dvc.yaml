@@ -34,12 +34,23 @@ stages:
     - data/interim/observed.pickle
     outs:
     - data/processed/result/
+  make_observed_explore:
+    foreach: ${explore}
+    do:
+      cmd: >-
+        poetry run python -m src.data.make_observed
+        data/interim/observed_${key}.pickle
+        --random_state=${item.random_seed}
+      deps:
+      - src/data/make_observed.py
+      outs:
+      - data/interim/observed_${key}.pickle
   sampling_explore:
     foreach: ${explore}
     do:
       cmd: >-
         poetry run python -m src.models.sampling
-        data/interim/observed.pickle
+        data/interim/observed_${key}.pickle
         models/explore/model_and_trace_${key}.pickle
         --random_seed=${item.random_seed}
         --n_sampling=4000
@@ -47,10 +58,9 @@ stages:
         --n_chains=4
       deps:
       - src/models/sampling.py
-      - data/interim/observed.pickle
+      - data/interim/observed_${key}.pickle
       outs:
       - models/explore/model_and_trace_${key}.pickle
-
   visualization_explore:
     foreach: ${explore}
     do:
