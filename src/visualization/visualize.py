@@ -340,7 +340,7 @@ def output_results(
     # プロット
     savefig(
         make_fig_from_axes(
-            az.plot_dist(trace),
+            az.plot_dist(trace.prior_predictive["relative_uplift"]),
         ),
         Path(kwargs["figure_dir"]) / "distribution_with_obs.png",
         mlflow_log_artifact=True,
