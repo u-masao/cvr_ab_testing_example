@@ -93,3 +93,6 @@ target/
 
 # models
 /models/
+
+# charts
+/reports/figures/
