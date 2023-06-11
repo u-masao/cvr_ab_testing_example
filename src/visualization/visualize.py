@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 import pymc as pm
 
-from src.utils import make_fig_from_axes, plot_trace, savefig
+from src.utils import make_fig_from_axes, savefig
 
 
 def calc_summary_of_obs_and_true(observations: List, p_true: float) -> Dict:
@@ -310,7 +310,9 @@ def output_results(
 
     # 各 chain のトレースプロットを出力
     savefig(
-        plot_trace(trace, model),
+        make_fig_from_axes(
+            axes=pm.plot_trace(trace, compact=False, combined=False)
+        ),
         Path(kwargs["figure_dir"]) / "traceplot.png",
         mlflow_log_artifact=True,
     )
