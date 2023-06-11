@@ -192,7 +192,7 @@ def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
             **options,
         )
         axes[2 + offset].plot(
-            metrics["obs_a"]["obs_mean"], marker="x", label="obs_mean"
+            metrics["obs_a"]["obs_mean"], 0, marker="x", label="obs_mean"
         )
         plot_histogram_single(
             axes[4 + offset],
@@ -203,7 +203,7 @@ def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
             **options,
         )
         axes[4 + offset].plot(
-            metrics["obs_b"]["obs_mean"], marker="x", label="obs_mean"
+            metrics["obs_b"]["obs_mean"], 0, marker="x", label="obs_mean"
         )
         plot_histogram_single(
             axes[6 + offset],
