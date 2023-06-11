@@ -328,6 +328,15 @@ def output_results(
         mlflow_log_artifact=True,
     )
 
+    # 事後分布を出力
+    savefig(
+        make_fig_from_axes(
+            az.plot_posterior(trace),
+        ),
+        Path(kwargs["figure_dir"]) / "posterior.png",
+        mlflow_log_artifact=True,
+    )
+
     # forest を出力
     savefig(
         make_fig_from_axes(
