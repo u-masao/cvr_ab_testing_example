@@ -104,8 +104,14 @@ def calc_metrics(
     }
 
     # 確信区間を計算
-    metrics.update(calc_ci(trace.posterior, hdi_prob=hdi_prob))
+    ci_dict = calc_ci(trace.posterior, hdi_prob=hdi_prob)
+    metrics.update(ci_dict)
     logger.info(f"metrics: {metrics}")
+
+    # log ci
+    for key, value in ci_dict.items():
+        for sub_key, sub_value in value.items():
+            mlflow.log_param(f"{key}.{sub_key}", sub_value)
 
     return metrics
 
