@@ -50,7 +50,7 @@ stages:
       outs:
       - models/explore/model_and_trace_${key}.pickle
 
-  visualization:
+  visualization_explore:
     foreach: ${explore}
     do:
       cmd: >-
