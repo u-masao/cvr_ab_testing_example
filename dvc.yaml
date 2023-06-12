@@ -29,6 +29,7 @@ stages:
       models/model_and_trace_real.pickle
       data/interim/observed_real.pickle
       data/processed/real/
+      --figure_dir=reports/figures/real/
     deps:
     - src/visualization/visualize.py
     - src/utils.py
