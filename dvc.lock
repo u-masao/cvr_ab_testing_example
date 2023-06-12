@@ -38,8 +38,8 @@ stages:
       md5: 92cc1864852648a9cbe0d446d328e2cd
       size: 934
     - path: src/visualization/visualize.py
-      md5: 7e49a4df02a5fa12922081fd1cde0987
-      size: 13744
+      md5: 28ae97757734cd6c1254852af98c94d4
+      size: 13678
     outs:
     - path: data/processed/result/
       md5: 16a968553da7679810fa98f9649758cb.dir
@@ -300,8 +300,8 @@ stages:
       md5: 92cc1864852648a9cbe0d446d328e2cd
       size: 934
     - path: src/visualization/visualize.py
-      md5: 7e49a4df02a5fa12922081fd1cde0987
-      size: 13744
+      md5: 28ae97757734cd6c1254852af98c94d4
+      size: 13678
     outs:
     - path: data/processed/explore/seed_1006/
       md5: 7abe0f4025225b17ddabd53667423f84.dir
@@ -428,3 +428,26 @@ stages:
     - path: data/interim/observed_seed_1001.pickle
       md5: 0ca51042bccd798f4a06452f0104fb18
       size: 18263
+  simulate_observed:
+    cmd: poetry run python -m src.data.simulate_observed data/interim/observed.pickle
+    deps:
+    - path: src/data/simulate_observed.py
+      md5: 4ce25f00ab6af097444e3761d47ea781
+      size: 1887
+    outs:
+    - path: data/interim/observed.pickle
+      md5: d95d8d5e568790e7b031e867412eb257
+      size: 18263
+  make_dataset_real:
+    cmd: poetry run python -m src.data.make_dataset data/raw/observed_real.csv data/interim/observed_real.pickle
+    deps:
+    - path: data/raw/observed_real.csv
+      md5: 59d25f15428358a08b64985a8a74f92a
+      size: 16895
+    - path: src/data/simulate_observed.py
+      md5: 4ce25f00ab6af097444e3761d47ea781
+      size: 1887
+    outs:
+    - path: data/interim/observed_real.pickle
+      md5: 62afb8b3ede950dadfd332cd25a2cde7
+      size: 32328
