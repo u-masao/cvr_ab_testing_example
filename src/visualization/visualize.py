@@ -23,11 +23,9 @@ def load_theta(filepath) -> Tuple:
     theta = pickle.load(open(filepath, "rb"))
     p_a_true = theta["p_a_true"]
     p_b_true = theta["p_b_true"]
-    n_a = theta["n_a"]
-    n_b = theta["n_b"]
     observations_a = theta["obs_a"]
     observations_b = theta["obs_b"]
-    return p_a_true, p_b_true, n_a, n_b, observations_a, observations_b
+    return p_a_true, p_b_true, observations_a, observations_b
 
 
 def calc_ci(posterior, hdi_prob=0.95) -> Dict:
@@ -457,7 +455,7 @@ def main(**kwargs: Any) -> None:
 
     # load model, trace, theta
     model, trace = cloudpickle.load(open(kwargs["model_filepath"], "rb"))
-    p_a_true, p_b_true, n_a, n_b, observations_a, observations_b = load_theta(
+    p_a_true, p_b_true, observations_a, observations_b = load_theta(
         kwargs["theta_filepath"]
     )
 
