@@ -28,14 +28,14 @@ stages:
       poetry run python -m src.visualization.visualize
       models/model_and_trace_real.pickle
       data/interim/observed_real.pickle
-      data/processed/result/
+      data/processed/real/
     deps:
     - src/visualization/visualize.py
     - src/utils.py
     - models/model_and_trace_real.pickle
     - data/interim/observed_real.pickle
     outs:
-    - data/processed/result/real/
+    - data/processed/real/
   simulate_observed:
     cmd: >-
       poetry run python -m src.data.simulate_observed
