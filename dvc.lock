@@ -156,8 +156,8 @@ stages:
       md5: 92cc1864852648a9cbe0d446d328e2cd
       size: 934
     - path: src/visualization/visualize.py
-      md5: 7e49a4df02a5fa12922081fd1cde0987
-      size: 13744
+      md5: 28ae97757734cd6c1254852af98c94d4
+      size: 13678
     outs:
     - path: data/processed/explore/seed_1002/
       md5: d4993cb1a909220b5f1805f538a5876f.dir
@@ -383,4 +383,48 @@ stages:
     outs:
     - path: data/interim/observed_seed_1005.pickle
       md5: bb182b8d06b1903df9c48aa28a390824
+      size: 18263
+  simulate_observed_explore@seed_1003:
+    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1003.pickle
+      --random_state=1003
+    deps:
+    - path: src/data/simulate_observed.py
+      md5: 4ce25f00ab6af097444e3761d47ea781
+      size: 1887
+    outs:
+    - path: data/interim/observed_seed_1003.pickle
+      md5: 47e334a44e83ea11fa7026291f1450b2
+      size: 18263
+  simulate_observed_explore@seed_1002:
+    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1002.pickle
+      --random_state=1002
+    deps:
+    - path: src/data/simulate_observed.py
+      md5: 4ce25f00ab6af097444e3761d47ea781
+      size: 1887
+    outs:
+    - path: data/interim/observed_seed_1002.pickle
+      md5: 44914aeab3827f18858673b4561c1b18
+      size: 18263
+  simulate_observed_explore@seed_1006:
+    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1006.pickle
+      --random_state=1006
+    deps:
+    - path: src/data/simulate_observed.py
+      md5: 4ce25f00ab6af097444e3761d47ea781
+      size: 1887
+    outs:
+    - path: data/interim/observed_seed_1006.pickle
+      md5: 8c2becaa2b678aa5f863199c8c00cbe5
+      size: 18263
+  simulate_observed_explore@seed_1001:
+    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1001.pickle
+      --random_state=1001
+    deps:
+    - path: src/data/simulate_observed.py
+      md5: 4ce25f00ab6af097444e3761d47ea781
+      size: 1887
+    outs:
+    - path: data/interim/observed_seed_1001.pickle
+      md5: 0ca51042bccd798f4a06452f0104fb18
       size: 18263
