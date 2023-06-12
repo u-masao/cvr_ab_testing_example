@@ -44,7 +44,7 @@ stages:
       --n_a=2000
       --n_b=2000
       --p_a_true=0.04
-      --p_b_true=0.041
+      --p_b_true=0.044
       --random_state=1234
     deps:
     - src/data/simulate_observed.py
