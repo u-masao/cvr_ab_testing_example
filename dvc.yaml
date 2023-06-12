@@ -41,8 +41,8 @@ stages:
     cmd: >-
       poetry run python -m src.data.simulate_observed
       data/interim/observed.pickle
-      --n_a=10000
-      --n_b=5000
+      --n_a=100000
+      --n_b=100000
       --p_a_true=0.04
       --p_b_true=0.041
       --random_state=1234
