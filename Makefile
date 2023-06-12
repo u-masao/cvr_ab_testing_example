@@ -22,7 +22,7 @@ PYTHON_INTERPRETER = python3
 ## dvc repro
 repro: check_commit PIPELINE.md
 	poetry run dvc repro || git commit dvc.lock -m '[update] dvc repro'
-	git commit dvc.lock PIPELINE.md -m '[update] dvc repro' || true
+	git commit dvc.lock PIPELINE.md reports/figures/ -m '[update] dvc repro' || true
 
 ## make pipeline markdown
 PIPELINE.md: dvc.yaml params.yaml
