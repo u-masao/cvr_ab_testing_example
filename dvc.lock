@@ -15,24 +15,24 @@ stages:
       --random_seed=1000 --n_sampling=4000 --n_tune=2000 --n_chains=4
     deps:
     - path: data/interim/observed.pickle
-      md5: d95d8d5e568790e7b031e867412eb257
-      size: 18263
+      md5: 93520121cad2ca5dc7f2b451ed1c3609
+      size: 120272
     - path: src/models/sampling.py
       md5: a0f11988d8c655d217402c9346bec8f0
       size: 3166
     outs:
     - path: models/model_and_trace.pickle
-      md5: f4a2c4fcd041a88e61a2fd2bb38eb068
+      md5: 122830d65633405b1da5d43565a707fc
       size: 1013142
   visualization:
     cmd: poetry run python -m src.visualization.visualize models/model_and_trace.pickle
       data/interim/observed.pickle data/processed/result/
     deps:
     - path: data/interim/observed.pickle
-      md5: d95d8d5e568790e7b031e867412eb257
-      size: 18263
+      md5: 93520121cad2ca5dc7f2b451ed1c3609
+      size: 120272
     - path: models/model_and_trace.pickle
-      md5: f4a2c4fcd041a88e61a2fd2bb38eb068
+      md5: 122830d65633405b1da5d43565a707fc
       size: 1013142
     - path: src/utils.py
       md5: 92cc1864852648a9cbe0d446d328e2cd
@@ -42,8 +42,8 @@ stages:
       size: 13678
     outs:
     - path: data/processed/result/
-      md5: 16a968553da7679810fa98f9649758cb.dir
-      size: 17016
+      md5: 05f772fa6a3666111b60686514a1dcc9.dir
+      size: 17185
       nfiles: 3
   make_observed:
     cmd: poetry run python -m src.data.make_observed data/interim/observed.pickle
@@ -430,14 +430,15 @@ stages:
       size: 18263
   simulate_observed:
     cmd: poetry run python -m src.data.simulate_observed data/interim/observed.pickle
+      --n_a=10000 --n_b=5000 --p_a_true=0.04 --p_b_true=0.041 --random_state=1234
     deps:
     - path: src/data/simulate_observed.py
       md5: 4ce25f00ab6af097444e3761d47ea781
       size: 1887
     outs:
     - path: data/interim/observed.pickle
-      md5: d95d8d5e568790e7b031e867412eb257
-      size: 18263
+      md5: 93520121cad2ca5dc7f2b451ed1c3609
+      size: 120272
   make_dataset_real:
     cmd: poetry run python -m src.data.make_dataset data/raw/observed_real.csv data/interim/observed_real.pickle
     deps:
