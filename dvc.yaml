@@ -9,7 +9,7 @@ stages:
     - data/raw/observed.csv
     outs:
     - data/interim/observed_real.pickle
-  sampling:
+  sampling_real:
     cmd: >-
       poetry run python -m src.models.sampling
       data/interim/observed_real.pickle
@@ -23,7 +23,7 @@ stages:
     - data/interim/observed_real.pickle
     outs:
     - models/model_and_trace_real.pickle
-  visualization:
+  visualization_real:
     cmd: >-
       poetry run python -m src.visualization.visualize
       models/model_and_trace_real.pickle
