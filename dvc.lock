@@ -135,8 +135,8 @@ stages:
       md5: 92cc1864852648a9cbe0d446d328e2cd
       size: 934
     - path: src/visualization/visualize.py
-      md5: 7e49a4df02a5fa12922081fd1cde0987
-      size: 13744
+      md5: 28ae97757734cd6c1254852af98c94d4
+      size: 13678
     outs:
     - path: data/processed/explore/seed_1001/
       md5: ab3b019f1c6643d2f9398032e5033006.dir
@@ -451,3 +451,14 @@ stages:
     - path: data/interim/observed_real.pickle
       md5: 62afb8b3ede950dadfd332cd25a2cde7
       size: 32328
+  simulate_observed_explore@seed_1005:
+    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1005.pickle
+      --random_state=1005
+    deps:
+    - path: src/data/simulate_observed.py
+      md5: 4ce25f00ab6af097444e3761d47ea781
+      size: 1887
+    outs:
+    - path: data/interim/observed_seed_1005.pickle
+      md5: bb182b8d06b1903df9c48aa28a390824
+      size: 18263
