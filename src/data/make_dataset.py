@@ -7,7 +7,18 @@ import mlflow
 import pandas as pd
 
 
-def make_dataset(df: pd.DataFrame, kwargs: Dict) -> Dict:
+def make_dataset(df: pd.DataFrame) -> Dict:
+    """
+    入力データを集計し、頻度を計算する。
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        コンバージョン有無のフラグデータ
+        n 行、2 列
+        1列目をA群、2列目をB群とする
+        null はカウントしない
+    """
     results = {}
     for index, (n, p, obs) in enumerate(
         [
@@ -27,7 +38,20 @@ def make_dataset(df: pd.DataFrame, kwargs: Dict) -> Dict:
 @click.argument("output_filepath", type=click.Path())
 @click.option("--mlflow_run_name", type=str, default="develop")
 def main(**kwargs: Any) -> None:
-    """メイン処理"""
+    """
+    コンバージョン有無のデータを読み込み頻度を計算する。
+
+    入力データ形式: テキストファイル
+    入力フォーマット: CSV、UTF-8(ASCII)、ヘッダあり、2列
+
+    出力データ形式: python pickle, Dict
+
+    引数 INPUT_FILEPATH : str
+        入力データのファイルパス
+
+    引数 OUTPUT_FILEPATH : str
+        出力データのファイルパス
+    """
 
     # init logger
     logger = logging.getLogger(__name__)
@@ -43,7 +67,7 @@ def main(**kwargs: Any) -> None:
     raw_df = pd.read_csv(kwargs["input_filepath"])
 
     # make observed
-    dataset = make_dataset(raw_df, kwargs)
+    dataset = make_dataset(raw_df)
 
     # output
     logger.info(f"pickle output filepath: {kwargs['output_filepath']}")
