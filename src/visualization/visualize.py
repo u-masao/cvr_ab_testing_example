@@ -29,6 +29,9 @@ def load_theta(filepath) -> Tuple:
 
 
 def calc_ci(posterior, hdi_prob=0.95) -> Dict:
+    """
+    事後分布から確信区間を計算
+    """
     # init log
     logger = logging.getLogger(__name__)
 
@@ -45,6 +48,8 @@ def calc_ci(posterior, hdi_prob=0.95) -> Dict:
     relative_uplift_ci_low, relative_uplift_ci_high = az.hdi(
         relative_uplift, hdi_prob=hdi_prob
     )
+
+    # 結果を返す辞書を作成
     ci = {
         "p_a": {"ci_low": p_a_ci_low, "ci_high": p_a_ci_high},
         "p_b": {"ci_low": p_b_ci_low, "ci_high": p_b_ci_high},
@@ -60,7 +65,7 @@ def calc_ci(posterior, hdi_prob=0.95) -> Dict:
 
 def calc_summary_of_obs_and_true(observations: List, p_true: float) -> Dict:
     """
-    観測値のサマリーと真値との違いを計算
+    観測値のサマリーと真の値(生成時のパラメーター)を比較
     """
     disp_length = np.min([20, len(observations)])
     return {
@@ -83,6 +88,9 @@ def calc_metrics(
     trace,
     hdi_prob,
 ) -> Dict:
+    """
+    観測値と真の値を比較し記録
+    """
     # init log
     logger = logging.getLogger(__name__)
 
@@ -335,6 +343,9 @@ def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
 
 
 def save_csv_and_log_artifact(df: pd.DataFrame, path) -> None:
+    """
+    データフレームを CSV 形式で出力
+    """
     df.to_csv(path)
     mlflow.log_artifact(path)
     mlflow.log_table(data=df, artifact_file=f"{path}.json")
@@ -350,7 +361,7 @@ def output_results(
     prob_summary_df,
     kwargs,
 ) -> None:
-    """結果を出力する"""
+    """結果を出力"""
 
     # make dirs
     os.makedirs(kwargs["csv_output_dir"], exist_ok=True)

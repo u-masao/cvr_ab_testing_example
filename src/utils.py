@@ -9,7 +9,10 @@ import pymc as pm
 
 
 def plot_trace(trace: az.InferenceData, model: pm.Model) -> mpl.figure.Figure:
-    # save trace plot
+    """
+    trace plot を保存
+    """
+
     with model:
         axes = pm.plot_trace(trace, compact=False, combined=False)
     fig = make_fig_from_axes(axes)
@@ -18,6 +21,9 @@ def plot_trace(trace: az.InferenceData, model: pm.Model) -> mpl.figure.Figure:
 
 
 def make_fig_from_axes(axes) -> mpl.figure.Figure:
+    """
+    fig から axes を取り出す
+    """
     for ax in axes.flatten():
         ax.grid()
     fig = axes.ravel()[0].figure

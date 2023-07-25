@@ -36,7 +36,9 @@ def make_dataset(kwargs: Dict) -> Dict:
 @click.option("--random_state", type=int, default=1234)
 @click.option("--mlflow_run_name", type=str, default="develop")
 def main(**kwargs: Any) -> None:
-    """メイン処理"""
+    """
+    パラメーターに基づいてベルヌーイ分布の観測値を生成し集計する。
+    """
 
     # init logger
     logger = logging.getLogger(__name__)
