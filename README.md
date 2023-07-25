@@ -74,3 +74,14 @@ $ poetry run dvc repro visualization_real
   - data/processed/real/
 
 
+結果の例
+--------
+
+![結果の例](https://github.com/u-masao/cvr_ab_testing_example/blob/main/reports/figures/real/distribution.png)
+
+
+- A 群と B 群のベルヌーイ分布のパラメーターの分布を推定した結果を表示
+
+- 確信区間を読み取れる
+
+- uplift や 相対 uplift の累積分布から「Bが負ける確率」などを読み取れる
