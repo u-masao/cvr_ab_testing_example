@@ -28,7 +28,7 @@ def make_dataset(df: pd.DataFrame) -> Dict:
     ):
         results[n] = len(df.iloc[:, index].dropna())
         results[p] = df.iloc[:, index].mean()
-        results[obs] = df.iloc[:, index].values
+        results[obs] = df.iloc[:, index].dropna().values
 
     return results
 
