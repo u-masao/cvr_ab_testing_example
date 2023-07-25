@@ -1,57 +1,76 @@
 cvr_ab_testing_example
-==============================
+======================
 
-A short description of the project.
+このソフトウェアは成功と失敗の 2 値をとる試行について A/B テストを行った結果を分析します。
 
-Project Organization
-------------
-
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
-
-
+分析方法
 --------
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+A群とB群を独立したベルヌーイ分布とみなしてパラメーターをベイズ推定します。
+
+- DAG
+  - ![DAG](https://github.com/u-masao/cvr_ab_testing_example/blob/main/reports/figures/real/dag.png)
+
+動作確認環境
+------------
+
+- OS: Ubuntu 22.04
+- Python: 3.10
+
+インストール方法
+----------------
+
+
+poetry のインストール
+
+```
+$ pip install poetry
+```
+
+ライブラリのインストール
+
+```
+$ git clone https://github.com/u-masao/cvr_ab_testing_example.git
+$ cd cvr_ab_testing_example
+$ poetry install
+```
+
+データの作成
+------------
+
+実験結果を CSV ファイルで保存します。
+
+- ファイル保存先: data/raw/observed_real.csv
+- ファイル形式: CSV, UTF-8, ヘッダあり
+- 試行していない箇所は NULL とする
+- 行の関連は見ない(対応のない2群の分析)
+
+```:入力データ例
+obs_a,obs_b
+1,0
+1,0
+1,1
+0,1
+,1
+,0
+,1
+```
+
+
+実行方法
+--------
+
+```
+$ poetry run dvc repro visualization_real
+```
+
+実行結果
+--------
+
+- チャート
+  - reports/figures/real/
+
+- 数値
+  - data/processed/real/
+
+
