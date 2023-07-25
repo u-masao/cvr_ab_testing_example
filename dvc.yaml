@@ -5,7 +5,7 @@ stages:
       data/raw/observed_real.csv
       data/interim/observed_real.pickle
     deps:
-    - src/data/simulate_observed.py
+    - src/data/make_dataset.py
     - data/raw/observed_real.csv
     outs:
     - data/interim/observed_real.pickle
