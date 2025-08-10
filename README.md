@@ -99,6 +99,6 @@ make ui
 ブラウザで http://localhost:7860/ にアクセスして下さい。
 
 
-![docs/Web-ui-screenshot.png]
+![スクリーンショット](docs/Web-ui-screenshot.png)
 
 
