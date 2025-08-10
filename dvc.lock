@@ -11,42 +11,45 @@ stages:
       md5: d95d8d5e568790e7b031e867412eb257
       size: 18263
   sampling:
-    cmd: poetry run python -m src.models.sampling data/interim/observed.pickle models/model_and_trace.pickle
-      --random_seed=1000 --n_sampling=4000 --n_tune=2000 --n_chains=4
+    cmd: poetry run python -m src.models.sampling data/interim/observed.pickle 
+      models/model_and_trace.pickle --random_seed=1000 --n_sampling=4000 
+      --n_tune=2000 --n_chains=4
     deps:
     - path: data/interim/observed.pickle
-      md5: 97303616074754fc71e7a6c65f5fb3ff
-      size: 32263
+      md5: fc3ee6afd22acffec9023495cb990cb6
+      size: 32264
     - path: src/models/sampling.py
       md5: a0f11988d8c655d217402c9346bec8f0
       size: 3166
     outs:
     - path: models/model_and_trace.pickle
-      md5: b9aa283a03b7c3495d1d86d4e6e11f75
-      size: 1013166
+      md5: 88487e19667068d117be450d0fd32140
+      size: 997488
   visualization:
-    cmd: poetry run python -m src.visualization.visualize models/model_and_trace.pickle
-      data/interim/observed.pickle data/processed/result/
+    cmd: poetry run python -m src.visualization.visualize 
+      models/model_and_trace.pickle data/interim/observed.pickle 
+      data/processed/result/
     deps:
     - path: data/interim/observed.pickle
-      md5: 97303616074754fc71e7a6c65f5fb3ff
-      size: 32263
+      md5: fc3ee6afd22acffec9023495cb990cb6
+      size: 32264
     - path: models/model_and_trace.pickle
-      md5: b9aa283a03b7c3495d1d86d4e6e11f75
-      size: 1013166
+      md5: 88487e19667068d117be450d0fd32140
+      size: 997488
     - path: src/utils.py
-      md5: 92cc1864852648a9cbe0d446d328e2cd
-      size: 934
+      md5: c0d379ab328fa94562feae65c44effa1
+      size: 1011
     - path: src/visualization/visualize.py
-      md5: 28ae97757734cd6c1254852af98c94d4
-      size: 13678
+      md5: 55746082936fb18541d674c2e5d2bcb8
+      size: 14477
     outs:
     - path: data/processed/result/
-      md5: e0bdc050d713b142d63677115eb20fe7.dir
-      size: 17092
+      md5: e40552dbb5ae9bde380d50296276ea73.dir
+      size: 17105
       nfiles: 3
   make_observed:
-    cmd: poetry run python -m src.data.make_observed data/interim/observed.pickle
+    cmd: poetry run python -m src.data.make_observed 
+      data/interim/observed.pickle
     deps:
     - path: src/data/make_observed.py
       md5: 4ce25f00ab6af097444e3761d47ea781
@@ -56,260 +59,281 @@ stages:
       md5: d95d8d5e568790e7b031e867412eb257
       size: 18263
   sampling_explore@seed_1001:
-    cmd: poetry run python -m src.models.sampling data/interim/observed_seed_1001.pickle
-      models/explore/model_and_trace_seed_1001.pickle --random_seed=1001 --n_sampling=4000
-      --n_tune=2000 --n_chains=4
+    cmd: poetry run python -m src.models.sampling 
+      data/interim/observed_seed_1001.pickle 
+      models/explore/model_and_trace_seed_1001.pickle --random_seed=1001 
+      --n_sampling=4000 --n_tune=2000 --n_chains=4
     deps:
     - path: data/interim/observed_seed_1001.pickle
-      md5: 0ca51042bccd798f4a06452f0104fb18
-      size: 18263
+      md5: 11c7c8bb3e06136bf6e3e5445298483d
+      size: 18264
     - path: src/models/sampling.py
       md5: a0f11988d8c655d217402c9346bec8f0
       size: 3166
     outs:
     - path: models/explore/model_and_trace_seed_1001.pickle
-      md5: 2df50ed4cb4c8d2ddc849a0e5dca08ac
-      size: 1013141
+      md5: 9a13bf745e0372076eb8989512bffd20
+      size: 997465
   sampling_explore@seed_1002:
-    cmd: poetry run python -m src.models.sampling data/interim/observed_seed_1002.pickle
-      models/explore/model_and_trace_seed_1002.pickle --random_seed=1002 --n_sampling=4000
-      --n_tune=2000 --n_chains=4
+    cmd: poetry run python -m src.models.sampling 
+      data/interim/observed_seed_1002.pickle 
+      models/explore/model_and_trace_seed_1002.pickle --random_seed=1002 
+      --n_sampling=4000 --n_tune=2000 --n_chains=4
     deps:
     - path: data/interim/observed_seed_1002.pickle
-      md5: 44914aeab3827f18858673b4561c1b18
-      size: 18263
+      md5: 3d099f5bba544f643cbc81f425e7dace
+      size: 18264
     - path: src/models/sampling.py
       md5: a0f11988d8c655d217402c9346bec8f0
       size: 3166
     outs:
     - path: models/explore/model_and_trace_seed_1002.pickle
-      md5: f2760017a2805749d7ab1a6dcf9ab899
-      size: 1013142
+      md5: a76592d47d9444bd7f6ff12be1718d58
+      size: 997466
   sampling_explore@seed_1000:
-    cmd: poetry run python -m src.models.sampling data/interim/observed_seed_1000.pickle
-      models/explore/model_and_trace_seed_1000.pickle --random_seed=1000 --n_sampling=4000
-      --n_tune=2000 --n_chains=4
+    cmd: poetry run python -m src.models.sampling 
+      data/interim/observed_seed_1000.pickle 
+      models/explore/model_and_trace_seed_1000.pickle --random_seed=1000 
+      --n_sampling=4000 --n_tune=2000 --n_chains=4
     deps:
     - path: data/interim/observed_seed_1000.pickle
-      md5: 7915ee9edb1efc488c7dc99845dd5dfb
-      size: 18263
+      md5: e2c19f0b3ae927bb08995e42d2fff702
+      size: 18264
     - path: src/models/sampling.py
       md5: a0f11988d8c655d217402c9346bec8f0
       size: 3166
     outs:
     - path: models/explore/model_and_trace_seed_1000.pickle
-      md5: 8434362f463816dd6907d5846a138c01
-      size: 1013142
+      md5: dabe1466e02fab99379d8e543a8a7ca0
+      size: 997464
   visualization_explore@seed_1000:
-    cmd: poetry run python -m src.visualization.visualize models/explore/model_and_trace_seed_1000.pickle
-      data/interim/observed_seed_1000.pickle data/processed/explore/seed_1000/ --figure_dir=reports/figures/explore/seed_1000/
+    cmd: poetry run python -m src.visualization.visualize 
+      models/explore/model_and_trace_seed_1000.pickle 
+      data/interim/observed_seed_1000.pickle data/processed/explore/seed_1000/ 
+      --figure_dir=reports/figures/explore/seed_1000/
     deps:
     - path: data/interim/observed_seed_1000.pickle
-      md5: 7915ee9edb1efc488c7dc99845dd5dfb
-      size: 18263
+      md5: e2c19f0b3ae927bb08995e42d2fff702
+      size: 18264
     - path: models/explore/model_and_trace_seed_1000.pickle
-      md5: 8434362f463816dd6907d5846a138c01
-      size: 1013142
+      md5: dabe1466e02fab99379d8e543a8a7ca0
+      size: 997464
     - path: src/utils.py
-      md5: 92cc1864852648a9cbe0d446d328e2cd
-      size: 934
+      md5: c0d379ab328fa94562feae65c44effa1
+      size: 1011
     - path: src/visualization/visualize.py
-      md5: 28ae97757734cd6c1254852af98c94d4
-      size: 13678
+      md5: 55746082936fb18541d674c2e5d2bcb8
+      size: 14477
     outs:
     - path: data/processed/explore/seed_1000/
-      md5: 08b206e22701d7001f408e4ccf4ea3ca.dir
-      size: 17032
+      md5: 806ce143eaf572dbf62b1b479e39ee5c.dir
+      size: 17019
       nfiles: 3
   visualization_explore@seed_1001:
-    cmd: poetry run python -m src.visualization.visualize models/explore/model_and_trace_seed_1001.pickle
-      data/interim/observed_seed_1001.pickle data/processed/explore/seed_1001/ --figure_dir=reports/figures/explore/seed_1001/
+    cmd: poetry run python -m src.visualization.visualize 
+      models/explore/model_and_trace_seed_1001.pickle 
+      data/interim/observed_seed_1001.pickle data/processed/explore/seed_1001/ 
+      --figure_dir=reports/figures/explore/seed_1001/
     deps:
     - path: data/interim/observed_seed_1001.pickle
-      md5: 0ca51042bccd798f4a06452f0104fb18
-      size: 18263
+      md5: 11c7c8bb3e06136bf6e3e5445298483d
+      size: 18264
     - path: models/explore/model_and_trace_seed_1001.pickle
-      md5: 2df50ed4cb4c8d2ddc849a0e5dca08ac
-      size: 1013141
+      md5: 9a13bf745e0372076eb8989512bffd20
+      size: 997465
     - path: src/utils.py
-      md5: 92cc1864852648a9cbe0d446d328e2cd
-      size: 934
+      md5: c0d379ab328fa94562feae65c44effa1
+      size: 1011
     - path: src/visualization/visualize.py
-      md5: 28ae97757734cd6c1254852af98c94d4
-      size: 13678
+      md5: 55746082936fb18541d674c2e5d2bcb8
+      size: 14477
     outs:
     - path: data/processed/explore/seed_1001/
-      md5: ab3b019f1c6643d2f9398032e5033006.dir
-      size: 16987
+      md5: df33255296c93827b14f2415cc4da023.dir
+      size: 16978
       nfiles: 3
   visualization_explore@seed_1002:
-    cmd: poetry run python -m src.visualization.visualize models/explore/model_and_trace_seed_1002.pickle
-      data/interim/observed_seed_1002.pickle data/processed/explore/seed_1002/ --figure_dir=reports/figures/explore/seed_1002/
+    cmd: poetry run python -m src.visualization.visualize 
+      models/explore/model_and_trace_seed_1002.pickle 
+      data/interim/observed_seed_1002.pickle data/processed/explore/seed_1002/ 
+      --figure_dir=reports/figures/explore/seed_1002/
     deps:
     - path: data/interim/observed_seed_1002.pickle
-      md5: 44914aeab3827f18858673b4561c1b18
-      size: 18263
+      md5: 3d099f5bba544f643cbc81f425e7dace
+      size: 18264
     - path: models/explore/model_and_trace_seed_1002.pickle
-      md5: f2760017a2805749d7ab1a6dcf9ab899
-      size: 1013142
+      md5: a76592d47d9444bd7f6ff12be1718d58
+      size: 997466
     - path: src/utils.py
-      md5: 92cc1864852648a9cbe0d446d328e2cd
-      size: 934
+      md5: c0d379ab328fa94562feae65c44effa1
+      size: 1011
     - path: src/visualization/visualize.py
-      md5: 28ae97757734cd6c1254852af98c94d4
-      size: 13678
+      md5: 55746082936fb18541d674c2e5d2bcb8
+      size: 14477
     outs:
     - path: data/processed/explore/seed_1002/
-      md5: d4993cb1a909220b5f1805f538a5876f.dir
-      size: 17136
+      md5: 9401c48e23c5821eec437f9e415d08a4.dir
+      size: 17124
       nfiles: 3
   sampling_explore@seed_1003:
-    cmd: poetry run python -m src.models.sampling data/interim/observed_seed_1003.pickle
-      models/explore/model_and_trace_seed_1003.pickle --random_seed=1003 --n_sampling=4000
-      --n_tune=2000 --n_chains=4
+    cmd: poetry run python -m src.models.sampling 
+      data/interim/observed_seed_1003.pickle 
+      models/explore/model_and_trace_seed_1003.pickle --random_seed=1003 
+      --n_sampling=4000 --n_tune=2000 --n_chains=4
     deps:
     - path: data/interim/observed_seed_1003.pickle
-      md5: 47e334a44e83ea11fa7026291f1450b2
-      size: 18263
+      md5: 68465082159d706cbf59e3c2ca7fd15b
+      size: 18264
     - path: src/models/sampling.py
       md5: a0f11988d8c655d217402c9346bec8f0
       size: 3166
     outs:
     - path: models/explore/model_and_trace_seed_1003.pickle
-      md5: 71f41e6347fa20db3ab8a49774fd6bd9
-      size: 1013143
+      md5: 8d32c6f66e30da6e10c6d5aa72a65e08
+      size: 997470
   visualization_explore@seed_1003:
-    cmd: poetry run python -m src.visualization.visualize models/explore/model_and_trace_seed_1003.pickle
-      data/interim/observed_seed_1003.pickle data/processed/explore/seed_1003/ --figure_dir=reports/figures/explore/seed_1003/
+    cmd: poetry run python -m src.visualization.visualize 
+      models/explore/model_and_trace_seed_1003.pickle 
+      data/interim/observed_seed_1003.pickle data/processed/explore/seed_1003/ 
+      --figure_dir=reports/figures/explore/seed_1003/
     deps:
     - path: data/interim/observed_seed_1003.pickle
-      md5: 47e334a44e83ea11fa7026291f1450b2
-      size: 18263
+      md5: 68465082159d706cbf59e3c2ca7fd15b
+      size: 18264
     - path: models/explore/model_and_trace_seed_1003.pickle
-      md5: 71f41e6347fa20db3ab8a49774fd6bd9
-      size: 1013143
+      md5: 8d32c6f66e30da6e10c6d5aa72a65e08
+      size: 997470
     - path: src/utils.py
-      md5: 92cc1864852648a9cbe0d446d328e2cd
-      size: 934
+      md5: c0d379ab328fa94562feae65c44effa1
+      size: 1011
     - path: src/visualization/visualize.py
-      md5: 28ae97757734cd6c1254852af98c94d4
-      size: 13678
+      md5: 55746082936fb18541d674c2e5d2bcb8
+      size: 14477
     outs:
     - path: data/processed/explore/seed_1003/
-      md5: b633aac253e97c8ba62a340083935d97.dir
-      size: 17053
+      md5: 19bfe75cebd87243baac2507c7d4ed09.dir
+      size: 17074
       nfiles: 3
   sampling_explore@seed_1005:
-    cmd: poetry run python -m src.models.sampling data/interim/observed_seed_1005.pickle
-      models/explore/model_and_trace_seed_1005.pickle --random_seed=1005 --n_sampling=4000
-      --n_tune=2000 --n_chains=4
+    cmd: poetry run python -m src.models.sampling 
+      data/interim/observed_seed_1005.pickle 
+      models/explore/model_and_trace_seed_1005.pickle --random_seed=1005 
+      --n_sampling=4000 --n_tune=2000 --n_chains=4
     deps:
     - path: data/interim/observed_seed_1005.pickle
-      md5: bb182b8d06b1903df9c48aa28a390824
-      size: 18263
+      md5: e5dd5a0bba1a9d389a95cc63cc749c13
+      size: 18264
     - path: src/models/sampling.py
       md5: a0f11988d8c655d217402c9346bec8f0
       size: 3166
     outs:
     - path: models/explore/model_and_trace_seed_1005.pickle
-      md5: a3546cc33428d683cd84443ec05696c4
-      size: 1013143
+      md5: 7b7807ad8861ab4a99f28f7d9bc2e03c
+      size: 997466
   visualization_explore@seed_1005:
-    cmd: poetry run python -m src.visualization.visualize models/explore/model_and_trace_seed_1005.pickle
-      data/interim/observed_seed_1005.pickle data/processed/explore/seed_1005/ --figure_dir=reports/figures/explore/seed_1005/
+    cmd: poetry run python -m src.visualization.visualize 
+      models/explore/model_and_trace_seed_1005.pickle 
+      data/interim/observed_seed_1005.pickle data/processed/explore/seed_1005/ 
+      --figure_dir=reports/figures/explore/seed_1005/
     deps:
     - path: data/interim/observed_seed_1005.pickle
-      md5: bb182b8d06b1903df9c48aa28a390824
-      size: 18263
+      md5: e5dd5a0bba1a9d389a95cc63cc749c13
+      size: 18264
     - path: models/explore/model_and_trace_seed_1005.pickle
-      md5: a3546cc33428d683cd84443ec05696c4
-      size: 1013143
+      md5: 7b7807ad8861ab4a99f28f7d9bc2e03c
+      size: 997466
     - path: src/utils.py
-      md5: 92cc1864852648a9cbe0d446d328e2cd
-      size: 934
+      md5: c0d379ab328fa94562feae65c44effa1
+      size: 1011
     - path: src/visualization/visualize.py
-      md5: 28ae97757734cd6c1254852af98c94d4
-      size: 13678
+      md5: 55746082936fb18541d674c2e5d2bcb8
+      size: 14477
     outs:
     - path: data/processed/explore/seed_1005/
-      md5: 21dfe10666966a6705ce9f571615ebd2.dir
-      size: 17136
+      md5: d293b995570fbac03ea7050136f730cc.dir
+      size: 17147
       nfiles: 3
   sampling_explore@seed_1004:
-    cmd: poetry run python -m src.models.sampling data/interim/observed_seed_1004.pickle
-      models/explore/model_and_trace_seed_1004.pickle --random_seed=1004 --n_sampling=4000
-      --n_tune=2000 --n_chains=4
+    cmd: poetry run python -m src.models.sampling 
+      data/interim/observed_seed_1004.pickle 
+      models/explore/model_and_trace_seed_1004.pickle --random_seed=1004 
+      --n_sampling=4000 --n_tune=2000 --n_chains=4
     deps:
     - path: data/interim/observed_seed_1004.pickle
-      md5: adb4608a88fc3818396cc654fe9d8896
-      size: 18263
+      md5: 256ac327b062bc71ea44950d95c446cc
+      size: 18264
     - path: src/models/sampling.py
       md5: a0f11988d8c655d217402c9346bec8f0
       size: 3166
     outs:
     - path: models/explore/model_and_trace_seed_1004.pickle
-      md5: 570183b21d1029e692f33ccdb2914130
-      size: 1013143
+      md5: 626bbaf886ce9a58032c446022037e72
+      size: 997469
   visualization_explore@seed_1004:
-    cmd: poetry run python -m src.visualization.visualize models/explore/model_and_trace_seed_1004.pickle
-      data/interim/observed_seed_1004.pickle data/processed/explore/seed_1004/ --figure_dir=reports/figures/explore/seed_1004/
+    cmd: poetry run python -m src.visualization.visualize 
+      models/explore/model_and_trace_seed_1004.pickle 
+      data/interim/observed_seed_1004.pickle data/processed/explore/seed_1004/ 
+      --figure_dir=reports/figures/explore/seed_1004/
     deps:
     - path: data/interim/observed_seed_1004.pickle
-      md5: adb4608a88fc3818396cc654fe9d8896
-      size: 18263
+      md5: 256ac327b062bc71ea44950d95c446cc
+      size: 18264
     - path: models/explore/model_and_trace_seed_1004.pickle
-      md5: 570183b21d1029e692f33ccdb2914130
-      size: 1013143
+      md5: 626bbaf886ce9a58032c446022037e72
+      size: 997469
     - path: src/utils.py
-      md5: 92cc1864852648a9cbe0d446d328e2cd
-      size: 934
+      md5: c0d379ab328fa94562feae65c44effa1
+      size: 1011
     - path: src/visualization/visualize.py
-      md5: 28ae97757734cd6c1254852af98c94d4
-      size: 13678
+      md5: 55746082936fb18541d674c2e5d2bcb8
+      size: 14477
     outs:
     - path: data/processed/explore/seed_1004/
-      md5: 6a349a5f1058537a90b4a49d2b15dc6f.dir
-      size: 17108
+      md5: 1021a743d7b5a7909202745bdcadcbfc.dir
+      size: 17078
       nfiles: 3
   sampling_explore@seed_1006:
-    cmd: poetry run python -m src.models.sampling data/interim/observed_seed_1006.pickle
-      models/explore/model_and_trace_seed_1006.pickle --random_seed=1006 --n_sampling=4000
-      --n_tune=2000 --n_chains=4
+    cmd: poetry run python -m src.models.sampling 
+      data/interim/observed_seed_1006.pickle 
+      models/explore/model_and_trace_seed_1006.pickle --random_seed=1006 
+      --n_sampling=4000 --n_tune=2000 --n_chains=4
     deps:
     - path: data/interim/observed_seed_1006.pickle
-      md5: 8c2becaa2b678aa5f863199c8c00cbe5
-      size: 18263
+      md5: 1ce3feae34d52c848e3cfda9134b814b
+      size: 18264
     - path: src/models/sampling.py
       md5: a0f11988d8c655d217402c9346bec8f0
       size: 3166
     outs:
     - path: models/explore/model_and_trace_seed_1006.pickle
-      md5: 3eeec9af1d951e4d9c56ff377c4bdaa5
-      size: 1013142
+      md5: e8ba748676aea232e0c9607a942bdc6a
+      size: 997469
   visualization_explore@seed_1006:
-    cmd: poetry run python -m src.visualization.visualize models/explore/model_and_trace_seed_1006.pickle
-      data/interim/observed_seed_1006.pickle data/processed/explore/seed_1006/ --figure_dir=reports/figures/explore/seed_1006/
+    cmd: poetry run python -m src.visualization.visualize 
+      models/explore/model_and_trace_seed_1006.pickle 
+      data/interim/observed_seed_1006.pickle data/processed/explore/seed_1006/ 
+      --figure_dir=reports/figures/explore/seed_1006/
     deps:
     - path: data/interim/observed_seed_1006.pickle
-      md5: 8c2becaa2b678aa5f863199c8c00cbe5
-      size: 18263
+      md5: 1ce3feae34d52c848e3cfda9134b814b
+      size: 18264
     - path: models/explore/model_and_trace_seed_1006.pickle
-      md5: 3eeec9af1d951e4d9c56ff377c4bdaa5
-      size: 1013142
+      md5: e8ba748676aea232e0c9607a942bdc6a
+      size: 997469
     - path: src/utils.py
-      md5: 92cc1864852648a9cbe0d446d328e2cd
-      size: 934
+      md5: c0d379ab328fa94562feae65c44effa1
+      size: 1011
     - path: src/visualization/visualize.py
-      md5: 28ae97757734cd6c1254852af98c94d4
-      size: 13678
+      md5: 55746082936fb18541d674c2e5d2bcb8
+      size: 14477
     outs:
     - path: data/processed/explore/seed_1006/
-      md5: 7abe0f4025225b17ddabd53667423f84.dir
-      size: 17046
+      md5: 37c298aa7fdea94a3ef4ee4bb6a11e22.dir
+      size: 16976
       nfiles: 3
   make_observed_explore@seed_1001:
-    cmd: poetry run python -m src.data.make_observed data/interim/observed_seed_1001.pickle
-      --random_state=1001
+    cmd: poetry run python -m src.data.make_observed 
+      data/interim/observed_seed_1001.pickle --random_state=1001
     deps:
     - path: src/data/make_observed.py
       md5: 4ce25f00ab6af097444e3761d47ea781
@@ -319,8 +343,8 @@ stages:
       md5: 0ca51042bccd798f4a06452f0104fb18
       size: 18263
   make_observed_explore@seed_1003:
-    cmd: poetry run python -m src.data.make_observed data/interim/observed_seed_1003.pickle
-      --random_state=1003
+    cmd: poetry run python -m src.data.make_observed 
+      data/interim/observed_seed_1003.pickle --random_state=1003
     deps:
     - path: src/data/make_observed.py
       md5: 4ce25f00ab6af097444e3761d47ea781
@@ -330,8 +354,8 @@ stages:
       md5: 47e334a44e83ea11fa7026291f1450b2
       size: 18263
   make_observed_explore@seed_1002:
-    cmd: poetry run python -m src.data.make_observed data/interim/observed_seed_1002.pickle
-      --random_state=1002
+    cmd: poetry run python -m src.data.make_observed 
+      data/interim/observed_seed_1002.pickle --random_state=1002
     deps:
     - path: src/data/make_observed.py
       md5: 4ce25f00ab6af097444e3761d47ea781
@@ -341,8 +365,8 @@ stages:
       md5: 44914aeab3827f18858673b4561c1b18
       size: 18263
   make_observed_explore@seed_1006:
-    cmd: poetry run python -m src.data.make_observed data/interim/observed_seed_1006.pickle
-      --random_state=1006
+    cmd: poetry run python -m src.data.make_observed 
+      data/interim/observed_seed_1006.pickle --random_state=1006
     deps:
     - path: src/data/make_observed.py
       md5: 4ce25f00ab6af097444e3761d47ea781
@@ -352,8 +376,8 @@ stages:
       md5: 8c2becaa2b678aa5f863199c8c00cbe5
       size: 18263
   make_observed_explore@seed_1000:
-    cmd: poetry run python -m src.data.make_observed data/interim/observed_seed_1000.pickle
-      --random_state=1000
+    cmd: poetry run python -m src.data.make_observed 
+      data/interim/observed_seed_1000.pickle --random_state=1000
     deps:
     - path: src/data/make_observed.py
       md5: 4ce25f00ab6af097444e3761d47ea781
@@ -363,8 +387,8 @@ stages:
       md5: 7915ee9edb1efc488c7dc99845dd5dfb
       size: 18263
   make_observed_explore@seed_1004:
-    cmd: poetry run python -m src.data.make_observed data/interim/observed_seed_1004.pickle
-      --random_state=1004
+    cmd: poetry run python -m src.data.make_observed 
+      data/interim/observed_seed_1004.pickle --random_state=1004
     deps:
     - path: src/data/make_observed.py
       md5: 4ce25f00ab6af097444e3761d47ea781
@@ -374,8 +398,8 @@ stages:
       md5: adb4608a88fc3818396cc654fe9d8896
       size: 18263
   make_observed_explore@seed_1005:
-    cmd: poetry run python -m src.data.make_observed data/interim/observed_seed_1005.pickle
-      --random_state=1005
+    cmd: poetry run python -m src.data.make_observed 
+      data/interim/observed_seed_1005.pickle --random_state=1005
     deps:
     - path: src/data/make_observed.py
       md5: 4ce25f00ab6af097444e3761d47ea781
@@ -385,62 +409,64 @@ stages:
       md5: bb182b8d06b1903df9c48aa28a390824
       size: 18263
   simulate_observed_explore@seed_1003:
-    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1003.pickle
-      --random_state=1003
+    cmd: poetry run python -m src.data.simulate_observed 
+      data/interim/observed_seed_1003.pickle --random_state=1003
     deps:
     - path: src/data/simulate_observed.py
-      md5: 4ce25f00ab6af097444e3761d47ea781
-      size: 1887
+      md5: cf036dc9ca8bfd81c198a704c4a89ee0
+      size: 1975
     outs:
     - path: data/interim/observed_seed_1003.pickle
-      md5: 47e334a44e83ea11fa7026291f1450b2
-      size: 18263
+      md5: 68465082159d706cbf59e3c2ca7fd15b
+      size: 18264
   simulate_observed_explore@seed_1002:
-    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1002.pickle
-      --random_state=1002
+    cmd: poetry run python -m src.data.simulate_observed 
+      data/interim/observed_seed_1002.pickle --random_state=1002
     deps:
     - path: src/data/simulate_observed.py
-      md5: 4ce25f00ab6af097444e3761d47ea781
-      size: 1887
+      md5: cf036dc9ca8bfd81c198a704c4a89ee0
+      size: 1975
     outs:
     - path: data/interim/observed_seed_1002.pickle
-      md5: 44914aeab3827f18858673b4561c1b18
-      size: 18263
+      md5: 3d099f5bba544f643cbc81f425e7dace
+      size: 18264
   simulate_observed_explore@seed_1006:
-    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1006.pickle
-      --random_state=1006
+    cmd: poetry run python -m src.data.simulate_observed 
+      data/interim/observed_seed_1006.pickle --random_state=1006
     deps:
     - path: src/data/simulate_observed.py
-      md5: 4ce25f00ab6af097444e3761d47ea781
-      size: 1887
+      md5: cf036dc9ca8bfd81c198a704c4a89ee0
+      size: 1975
     outs:
     - path: data/interim/observed_seed_1006.pickle
-      md5: 8c2becaa2b678aa5f863199c8c00cbe5
-      size: 18263
+      md5: 1ce3feae34d52c848e3cfda9134b814b
+      size: 18264
   simulate_observed_explore@seed_1001:
-    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1001.pickle
-      --random_state=1001
+    cmd: poetry run python -m src.data.simulate_observed 
+      data/interim/observed_seed_1001.pickle --random_state=1001
     deps:
     - path: src/data/simulate_observed.py
-      md5: 4ce25f00ab6af097444e3761d47ea781
-      size: 1887
+      md5: cf036dc9ca8bfd81c198a704c4a89ee0
+      size: 1975
     outs:
     - path: data/interim/observed_seed_1001.pickle
-      md5: 0ca51042bccd798f4a06452f0104fb18
-      size: 18263
+      md5: 11c7c8bb3e06136bf6e3e5445298483d
+      size: 18264
   simulate_observed:
-    cmd: poetry run python -m src.data.simulate_observed data/interim/observed.pickle
-      --n_a=2000 --n_b=2000 --p_a_true=0.04 --p_b_true=0.044 --random_state=1234
+    cmd: poetry run python -m src.data.simulate_observed 
+      data/interim/observed.pickle --n_a=2000 --n_b=2000 --p_a_true=0.04 
+      --p_b_true=0.044 --random_state=1234
     deps:
     - path: src/data/simulate_observed.py
-      md5: 4ce25f00ab6af097444e3761d47ea781
-      size: 1887
+      md5: cf036dc9ca8bfd81c198a704c4a89ee0
+      size: 1975
     outs:
     - path: data/interim/observed.pickle
-      md5: 97303616074754fc71e7a6c65f5fb3ff
-      size: 32263
+      md5: fc3ee6afd22acffec9023495cb990cb6
+      size: 32264
   make_dataset_real:
-    cmd: poetry run python -m src.data.make_dataset data/raw/observed_real.csv data/interim/observed_real.pickle
+    cmd: poetry run python -m src.data.make_dataset data/raw/observed_real.csv 
+      data/interim/observed_real.pickle
     deps:
     - path: data/raw/observed_real.csv
       md5: 79c3ef9f09341c04632c3ef09b9c3627
@@ -450,74 +476,75 @@ stages:
       size: 2332
     outs:
     - path: data/interim/observed_real.pickle
-      md5: 8bf3e70b0c1c9d340c7d712f0e185ed0
-      size: 32174
+      md5: 2eca05e1c36f1e8b51a5509e88940f0e
+      size: 32175
   simulate_observed_explore@seed_1005:
-    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1005.pickle
-      --random_state=1005
+    cmd: poetry run python -m src.data.simulate_observed 
+      data/interim/observed_seed_1005.pickle --random_state=1005
     deps:
     - path: src/data/simulate_observed.py
-      md5: 4ce25f00ab6af097444e3761d47ea781
-      size: 1887
+      md5: cf036dc9ca8bfd81c198a704c4a89ee0
+      size: 1975
     outs:
     - path: data/interim/observed_seed_1005.pickle
-      md5: bb182b8d06b1903df9c48aa28a390824
-      size: 18263
+      md5: e5dd5a0bba1a9d389a95cc63cc749c13
+      size: 18264
   simulate_observed_explore@seed_1000:
-    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1000.pickle
-      --random_state=1000
+    cmd: poetry run python -m src.data.simulate_observed 
+      data/interim/observed_seed_1000.pickle --random_state=1000
     deps:
     - path: src/data/simulate_observed.py
-      md5: 4ce25f00ab6af097444e3761d47ea781
-      size: 1887
+      md5: cf036dc9ca8bfd81c198a704c4a89ee0
+      size: 1975
     outs:
     - path: data/interim/observed_seed_1000.pickle
-      md5: 7915ee9edb1efc488c7dc99845dd5dfb
-      size: 18263
+      md5: e2c19f0b3ae927bb08995e42d2fff702
+      size: 18264
   sampling_real:
-    cmd: poetry run python -m src.models.sampling data/interim/observed_real.pickle
-      models/model_and_trace_real.pickle --random_seed=1000 --n_sampling=4000 --n_tune=2000
-      --n_chains=4
+    cmd: poetry run python -m src.models.sampling 
+      data/interim/observed_real.pickle models/model_and_trace_real.pickle 
+      --random_seed=1000 --n_sampling=4000 --n_tune=2000 --n_chains=4
     deps:
     - path: data/interim/observed_real.pickle
-      md5: 8bf3e70b0c1c9d340c7d712f0e185ed0
-      size: 32174
+      md5: 2eca05e1c36f1e8b51a5509e88940f0e
+      size: 32175
     - path: src/models/sampling.py
       md5: a0f11988d8c655d217402c9346bec8f0
       size: 3166
     outs:
     - path: models/model_and_trace_real.pickle
-      md5: 734973efa935b99d83cb9c83ae073228
-      size: 1013169
+      md5: 3ced1956ea4d47dd222e605f8a174dbf
+      size: 997466
   visualization_real:
-    cmd: poetry run python -m src.visualization.visualize models/model_and_trace_real.pickle
-      data/interim/observed_real.pickle data/processed/real/ --figure_dir=reports/figures/real/
+    cmd: poetry run python -m src.visualization.visualize 
+      models/model_and_trace_real.pickle data/interim/observed_real.pickle 
+      data/processed/real/ --figure_dir=reports/figures/real/
     deps:
     - path: data/interim/observed_real.pickle
-      md5: 8bf3e70b0c1c9d340c7d712f0e185ed0
-      size: 32174
+      md5: 2eca05e1c36f1e8b51a5509e88940f0e
+      size: 32175
     - path: models/model_and_trace_real.pickle
-      md5: 734973efa935b99d83cb9c83ae073228
-      size: 1013169
+      md5: 3ced1956ea4d47dd222e605f8a174dbf
+      size: 997466
     - path: src/utils.py
-      md5: ca97cffbece9dc9bfc0c9cca9dc79a3a
-      size: 1006
+      md5: c0d379ab328fa94562feae65c44effa1
+      size: 1011
     - path: src/visualization/visualize.py
-      md5: 8ef3bd88135a71a09c6b022063891638
-      size: 13918
+      md5: 55746082936fb18541d674c2e5d2bcb8
+      size: 14477
     outs:
     - path: data/processed/real/
-      md5: e305501b91cbff4592102303f0415b58.dir
-      size: 16976
+      md5: d9f57313ea828663f00e7f3d8c4373a1.dir
+      size: 17002
       nfiles: 3
   simulate_observed_explore@seed_1004:
-    cmd: poetry run python -m src.data.simulate_observed data/interim/observed_seed_1004.pickle
-      --random_state=1004
+    cmd: poetry run python -m src.data.simulate_observed 
+      data/interim/observed_seed_1004.pickle --random_state=1004
     deps:
     - path: src/data/simulate_observed.py
-      md5: 4ce25f00ab6af097444e3761d47ea781
-      size: 1887
+      md5: cf036dc9ca8bfd81c198a704c4a89ee0
+      size: 1975
     outs:
     - path: data/interim/observed_seed_1004.pickle
-      md5: adb4608a88fc3818396cc654fe9d8896
-      size: 18263
+      md5: 256ac327b062bc71ea44950d95c446cc
+      size: 18264
