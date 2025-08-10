@@ -43,4 +43,4 @@ def savefig(
     os.makedirs(save_path.parent, exist_ok=True)
     fig.savefig(save_path)
     if mlflow_log_artifact:
-        mlflow.log_artifact(save_path)
+        mlflow.log_artifact(str(save_path))
