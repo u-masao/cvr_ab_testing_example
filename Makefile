@@ -19,6 +19,10 @@ PYTHON_INTERPRETER = python3
 # PROJECT RULES                                                                 #
 #################################################################################
 
+## run ui
+ui:
+	PYTHONPATH=. poetry run gradio src/ui.py
+
 ## dvc repro
 repro: check_commit PIPELINE.md
 	poetry run dvc repro || git commit dvc.lock -m '[update] dvc repro'

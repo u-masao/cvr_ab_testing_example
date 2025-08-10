@@ -85,3 +85,20 @@ $ poetry run dvc repro visualization_real
 - 確信区間を読み取れる
 
 - uplift や 相対 uplift の累積分布から「Bが負ける確率」などを読み取れる
+
+
+Web UI について
+---------------
+
+以下のコマンドで Web UI が利用可能です。
+
+```
+make ui
+```
+
+ブラウザで http://localhost:7860/ にアクセスして下さい。
+
+
+![docs/Web-ui-screenshot.png]
+
+
