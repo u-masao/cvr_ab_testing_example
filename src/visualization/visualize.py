@@ -164,7 +164,7 @@ def calc_prob_for_dicision(
 
 def plot_histogram_single(
     ax,
-    p_true,
+    p_true: float | None,
     sample,
     value_name="",
     color_number=None,
@@ -204,15 +204,17 @@ def plot_histogram_single(
 
     # plot
     n, _, _ = ax.hist(sample, **hist_args)
-    ax.vlines(
-        p_true,
-        0,
-        np.max(n) * 1.2,
-        linestyle="--",
-        label=f"{value_name} の真の値",
-        colors=[color],
-        alpha=0.5,
-    )
+
+    if p_true:
+        ax.vlines(
+            p_true,
+            0,
+            np.max(n) * 1.2,
+            linestyle="--",
+            label=f"{value_name} の真の値",
+            colors=[color],
+            alpha=0.5,
+        )
     ci_bar_y = np.max(n) * (0.1 + 0.2 * np.random.rand())
     ax.plot(
         [ci_low, ci_high],
@@ -238,7 +240,11 @@ def plot_histogram_single(
 
 
 def plot_histogram_overlap(
-    ax, p_a_true, p_b_true, burned_trace, cumulative=False
+    ax,
+    p_a_true: float | None,
+    p_b_true: float | None,
+    burned_trace,
+    cumulative=False,
 ) -> None:
     """
     オーバーラップしたヒストグラムを描画
@@ -264,7 +270,12 @@ def plot_histogram_overlap(
     ax.set_title("$p_a$ と $p_b$ の分布")
 
 
-def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
+def plot_distribution(
+    p_a_true: float | None,
+    p_b_true: float | None,
+    trace,
+    metrics: dict | None,
+) -> mpl.figure.Figure:
     """plot histogram"""
     fig, axes = plt.subplots(5, 2, figsize=(16, 12))
     axes = axes.flatten()
@@ -285,9 +296,10 @@ def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
             color_number=2,
             **options,
         )
-        axes[2 + offset].plot(
-            metrics["obs_a"]["obs_mean"], 0, marker="x", label="観測値の平均値"
-        )
+        if metrics:
+            axes[2 + offset].plot(
+                metrics["obs_a"]["obs_mean"], 0, marker="x", label="観測値の平均値"
+            )
         plot_histogram_single(
             axes[4 + offset],
             p_b_true,
@@ -296,37 +308,48 @@ def plot_distribution(p_a_true, p_b_true, trace, metrics) -> mpl.figure.Figure:
             color_number=4,
             **options,
         )
-        axes[4 + offset].plot(
-            metrics["obs_b"]["obs_mean"], 0, marker="x", label="観測値の平均値"
-        )
+        if metrics:
+            axes[4 + offset].plot(
+                metrics["obs_b"]["obs_mean"], 0, marker="x", label="観測値の平均値"
+            )
+
+        # 真値が設定されている場合は相対値を計算
+        p_true_diff = None
+        p_true_relative = None
+        if p_a_true and p_b_true:
+            p_true_diff = p_b_true - p_a_true
+            p_true_relative = p_true_diff / p_a_true
+
         plot_histogram_single(
             axes[6 + offset],
-            p_b_true - p_a_true,
+            p_true_diff,
             p_b - p_a,
             value_name="$p_b - p_a$",
             color_number=6,
             **options,
         )
-        axes[6 + offset].plot(
-            metrics["obs_compare"]["obs_mean_uplift"],
-            0,
-            marker="x",
-            label="観測値の平均値",
-        )
+        if metrics:
+            axes[6 + offset].plot(
+                metrics["obs_compare"]["obs_mean_uplift"],
+                0,
+                marker="x",
+                label="観測値の平均値",
+            )
         plot_histogram_single(
             axes[8 + offset],
-            (p_b_true - p_a_true) / p_a_true,
+            p_true_relative,
             (p_b - p_a) / p_a,
             value_name="$(p_b - p_a) / p_a$",
             color_number=8,
             **options,
         )
-        axes[8 + offset].plot(
-            metrics["obs_compare"]["obs_mean_relative_uplift"],
-            0,
-            marker="x",
-            label="観測値の平均値",
-        )
+        if metrics:
+            axes[8 + offset].plot(
+                metrics["obs_compare"]["obs_mean_relative_uplift"],
+                0,
+                marker="x",
+                label="観測値の平均値",
+            )
 
     # 軸のスケールを一致
     for reference in [0, 1]:
