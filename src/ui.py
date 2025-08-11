@@ -1,4 +1,5 @@
 import io
+from typing import Dict, Union
 
 import arviz as az
 import gradio as gr
@@ -7,11 +8,81 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pymc as pm
+import statsmodels.stats.power as smp
+import statsmodels.stats.proportion as smprop
 from PIL import Image
 from scipy.stats import chi2_contingency
+from tqdm import tqdm
 
 from src.models.base import define_model
 from src.visualization.visualize import plot_distribution
+
+
+def calculate_sample_size(
+    baseline_cvr: float,
+    lift: float,
+    alpha: float = 0.05,
+    power: float = 0.80,
+    ratio: float = 1.0,
+) -> Dict[str, Union[float, int]]:
+    """
+    A/BテストのCVRに基づいて必要なサンプルサイズを計算し、結果を辞書で返します。
+
+    Args:
+        baseline_cvr (float): ベースラインのCVR（例: 0.03）。
+        lift (float): 検出したいCVRの絶対的な改善量（例: 0.005）。
+        alpha (float, optional): 有意水準。デフォルトは 0.05。
+        power (float, optional): 検出力。デフォルトは 0.80。
+        ratio (float, optional): グループBのサンプルサイズ / グループAのサンプルサイズの比率。
+                                 デフォルトは 1.0 (均等)。
+
+    Returns:
+        Dict[str, Union[float, int]]: 計算結果を含む辞書。
+            - baseline_cvr: 入力されたベースラインCVR
+            - target_cvr: 目標CVR (baseline_cvr + lift)
+            - lift: 入力された改善量
+            - alpha: 有意水準
+            - power: 検出力
+            - ratio: グループ間のサンプルサイズ比率
+            - effect_size: 計算された効果量 (Cohen's h)
+            - required_sample_size_group_a: グループAに必要なサンプルサイズ
+            - required_sample_size_group_b: グループBに必要なサンプルサイズ
+            - total_sample_size: 合計サンプルサイズ
+    """
+    # 効果量（Effect Size）を計算します。
+    effect_size = smprop.proportion_effectsize(
+        baseline_cvr, baseline_cvr + lift
+    )
+
+    # グループAに必要なサンプルサイズ（nobs1）を計算します。
+    # ratioは nobs2/nobs1 として扱われます。
+    required_nobs1 = smp.NormalIndPower().solve_power(
+        effect_size=effect_size,
+        power=power,
+        alpha=alpha,
+        ratio=ratio,
+        alternative="two-sided",  # 両側検定
+    )
+
+    # 計算結果を整数に切り上げます。
+    nobs1 = int(np.ceil(required_nobs1))
+    nobs2 = int(np.ceil(nobs1 * ratio))
+
+    # 結果を辞書にまとめる
+    result_dict = {
+        "baseline_cvr": baseline_cvr,
+        "target_cvr": baseline_cvr + lift,
+        "lift": lift,
+        "alpha": alpha,
+        "power": power,
+        "ratio": ratio,
+        "effect_size": effect_size,
+        "required_sample_size_group_a": nobs1,
+        "required_sample_size_group_b": nobs2,
+        "total_sample_size": nobs1 + nobs2,
+    }
+
+    return result_dict
 
 
 def run_chisquared_test(n_a, conversion_a, n_b, conversion_b) -> pd.DataFrame:
@@ -139,56 +210,44 @@ def run_bayesian_analysis(
     model = define_model([n_a, n_b], [conversion_a, conversion_b])
 
     with model:
+        # プログレス設定
+        pbar = tqdm(total=n_chains * (n_sampling + n_tune), desc="サンプリング中")
+
+        # プログレス更新
+        def update_progress(trace, draw):
+            pbar.update(1)
+
         # サンプリング
         trace = pm.sample(
             draws=n_sampling,
             tune=n_tune,
             chains=n_chains,
             random_seed=random_seed,
-            progressbar=True,
+            callback=update_progress,
         )
+
+        # プログレスクローズ
+        pbar.close()
 
     # 分析と可視化
     return analyze_bayesian_results(model, trace, hdi_prob)
 
 
-def run_analysis(
-    n_a,
-    conversion_a,
-    n_b,
-    conversion_b,
-    n_sampling,
-    n_tune,
-    n_chains,
-    random_seed,
-    hdi_prob,
-    progress=gr.Progress(track_tqdm=True),
-):
-    """
-    UIから呼び出されるメインの分析関数。
-    ベイズ分析とカイ二乗検定の両方を実行します。
-    """
-    bayesian_plots = run_bayesian_analysis(
-        n_a,
-        conversion_a,
-        n_b,
-        conversion_b,
-        n_sampling,
-        n_tune,
-        n_chains,
-        random_seed,
-        hdi_prob,
-        progress,
-    )
-    chisq_results = run_chisquared_test(n_a, conversion_a, n_b, conversion_b)
-
-    # gr.update()を使って各コンポーネントを更新
+def run_power_analysis(baseline_cvr, lift, alpha, power, ratio):
+    test_params = {
+        "baseline_cvr": baseline_cvr,
+        "lift": lift,
+        "alpha": alpha,
+        "power": power,
+        "ratio": ratio,  # 例: グループAとBを1:1にする場合は1.0、A:B=1:2にする場合は2.0
+    }
+    result = calculate_sample_size(**test_params)
+    result_df = pd.DataFrame([result]).T.reset_index()
+    result_df.columns = ["指標", "値"]
     return (
-        gr.update(value=bayesian_plots[0]),
-        gr.update(value=bayesian_plots[1]),
-        gr.update(value=bayesian_plots[2]),
-        gr.update(value=bayesian_plots[3]),
-        gr.update(value=chisq_results),
+        result["required_sample_size_group_a"],
+        result["required_sample_size_group_b"],
+        result_df,
     )
 
 
@@ -295,18 +354,18 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
     # --- 出力コンポーネント ---
     gr.Markdown("## 2. 分析結果")
     with gr.Row():
-        with gr.Column():
+        with gr.Column(scale=5):
             gr.Markdown("### ベイズ分析の結果")
             with gr.Tabs():
-                with gr.TabItem("📈 分布プロット"):
+                with gr.TabItem("📈 分布"):
                     distribution = gr.Plot()
-                with gr.TabItem("📊 サマリープロット"):
+                with gr.TabItem("📊 サマリー"):
                     params = gr.Plot()
-                with gr.TabItem("🕸️ モデル構造"):
+                with gr.TabItem("🕸️ モデル"):
                     model_img = gr.Image()
-                with gr.TabItem("🛰️ トレースプロット (収束確認)"):
+                with gr.TabItem("🛰️ トレースプロット"):
                     trace_plot = gr.Plot()
-        with gr.Column():
+        with gr.Column(scale=1):
             gr.Markdown("### カイ二乗検定の結果")
             chisq_result_df = gr.DataFrame(
                 headers=["指標", "値"], datatype=["str", "str"], label="検定結果"
@@ -323,10 +382,68 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
                 gr.Markdown(text_about_power_analysis)
             with gr.TabItem("ベイズ vs カイ二乗"):
                 gr.Markdown(text_bayesien_vs_chi_squared)
+    with gr.Accordion("🔢 サンプルサイズの計算", open=False):
+        with gr.Row():
+            with gr.Column():
+                power_analysis_inputs = {
+                    "baseline_cvr": gr.Number(
+                        0.053,
+                        minimum=0.0,
+                        maximum=1.0,
+                        step=0.001,
+                        label="ベースラインCVR",
+                    ),
+                    "lift": gr.Number(
+                        0.01,
+                        minimum=-1.0,
+                        maximum=1.0,
+                        step=0.001,
+                        label="検出したいCVRの増加量",
+                    ),
+                    "alpha": gr.Number(
+                        0.05,
+                        minimum=0.01,
+                        maximum=0.5,
+                        step=0.01,
+                        label="有意水準(Alpha)",
+                    ),
+                    "power": gr.Number(
+                        0.80,
+                        minimum=0.5,
+                        maximum=0.99,
+                        step=0.01,
+                        label="検出力(1-Beta)",
+                    ),
+                    "ratio": gr.Number(
+                        0.10,
+                        minimum=0.0,
+                        maximum=1000,
+                        step=0.01,
+                        label="A群に対するB群のサンプルサイズ比",
+                    ),
+                }
+            with gr.Column():
+                power_analysis_sample_size_a = gr.Number(label="A 群のサンプルサイズ")
+                power_analysis_sample_size_b = gr.Number(label="B 群のサンプルサイズ")
+                with gr.Accordion("分析結果の詳細", open=False):
+                    gr.Markdown("Cohen's h で効果量を計算し、サンプルサイズを計算しています")
+                    power_analysis_output = gr.DataFrame()
 
     # --- イベントリスナー ---
-    start_button.click(
-        run_analysis,
+    chisq_event = start_button.click(
+        fn=run_chisquared_test,
+        inputs=[
+            n_a,
+            conversion_a,
+            n_b,
+            conversion_b,
+        ],
+        outputs=[
+            chisq_result_df,
+        ],
+    )
+    chisq_event.then(
+        fn=run_bayesian_analysis,
         inputs=[
             n_a,
             conversion_a,
@@ -343,7 +460,16 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
             model_img,
             trace_plot,
             params,
-            chisq_result_df,
+        ],
+    )
+    gr.on(
+        triggers=[x.change for x in power_analysis_inputs.values()],
+        fn=run_power_analysis,
+        inputs=[x for x in power_analysis_inputs.values()],
+        outputs=[
+            power_analysis_sample_size_a,
+            power_analysis_sample_size_b,
+            power_analysis_output,
         ],
     )
 
