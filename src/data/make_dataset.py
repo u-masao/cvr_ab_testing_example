@@ -7,7 +7,7 @@ import mlflow
 import pandas as pd
 
 
-def make_dataset(df: pd.DataFrame) -> Dict:
+def make_dataset(df: pd.DataFrame) -> Dict[str, Any]:
     """
     入力データフレームから観測データを集計し、統計量を計算します。
 
@@ -24,7 +24,7 @@ def make_dataset(df: pd.DataFrame) -> Dict:
         各群の試行回数(n)、観測されたコンバージョン率(p_obs)、
         および観測値の配列(obs)を含む辞書。
     """
-    results = {}
+    results: dict[str, Any] = {}
     for n_key, p_key, obs_key in [
         ("n_a", "p_a_obs", "obs_a"),
         ("n_b", "p_b_obs", "obs_b"),
