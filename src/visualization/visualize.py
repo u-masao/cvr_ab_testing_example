@@ -32,8 +32,12 @@ def load_data(filepath) -> Dict:
     loaded_data = {
         "p_a_true": data.get("p_a_true"),
         "p_b_true": data.get("p_b_true"),
-        "p_a_obs": data.get("p_a_obs") if not is_simulation else data["obs_a"].mean(),
-        "p_b_obs": data.get("p_b_obs") if not is_simulation else data["obs_b"].mean(),
+        "p_a_obs": data.get("p_a_obs")
+        if not is_simulation
+        else data["obs_a"].mean(),
+        "p_b_obs": data.get("p_b_obs")
+        if not is_simulation
+        else data["obs_b"].mean(),
         "obs_a": data["obs_a"],
         "obs_b": data["obs_b"],
     }
@@ -99,7 +103,9 @@ def calc_summary_of_obs(observations: List, p_true: float | None) -> Dict:
     }
     if p_true is not None:
         summary["obs_mean_vs_true"] = summary["obs_mean"] - p_true
-        summary["obs_mean_vs_true_relative"] = (summary["obs_mean"] - p_true) / p_true
+        summary["obs_mean_vs_true_relative"] = (
+            summary["obs_mean"] - p_true
+        ) / p_true
     return summary
 
 
@@ -121,7 +127,8 @@ def calc_metrics(
     metrics["obs_a"] = calc_summary_of_obs(data["obs_a"], data["p_a_true"])
     metrics["obs_b"] = calc_summary_of_obs(data["obs_b"], data["p_b_true"])
     metrics["obs_compare"] = {
-        "obs_mean_uplift": metrics["obs_b"]["obs_mean"] - metrics["obs_a"]["obs_mean"],
+        "obs_mean_uplift": metrics["obs_b"]["obs_mean"]
+        - metrics["obs_a"]["obs_mean"],
         "obs_mean_relative_uplift": (
             metrics["obs_b"]["obs_mean"] - metrics["obs_a"]["obs_mean"]
         )
@@ -178,8 +185,8 @@ def calc_prob_for_dicision(
 
 def plot_histogram_single(
     ax,
-    p_true: float | None,
     sample,
+    p_true: float | None = None,
     value_name="",
     color_number=None,
     hdi_prob=0.95,
@@ -255,9 +262,9 @@ def plot_histogram_single(
 
 def plot_histogram_overlap(
     ax,
-    p_a_true: float | None,
-    p_b_true: float | None,
     burned_trace,
+    p_a_true: float | None = None,
+    p_b_true: float | None = None,
     cumulative=False,
 ) -> None:
     """
@@ -267,16 +274,16 @@ def plot_histogram_overlap(
     p_b = burned_trace.posterior["p"][:, :, 1].values.flatten()
     plot_histogram_single(
         ax,
-        p_a_true,
         p_a,
+        p_true=p_a_true,
         value_name="$p_a$",
         color_number=0,
         cumulative=cumulative,
     )
     plot_histogram_single(
         ax,
-        p_b_true,
         p_b,
+        p_true=p_b_true,
         value_name="$p_b$",
         color_number=2,
         cumulative=cumulative,
@@ -287,7 +294,7 @@ def plot_histogram_overlap(
 def plot_distribution(
     data: Dict,
     trace,
-    metrics: dict | None,
+    metrics: dict | None = None,
 ) -> mpl.figure.Figure:
     """
     A/Bテストの結果を可視化する主要な分布プロットを生成します。
@@ -318,17 +325,56 @@ def plot_distribution(
     p_a_true = data["p_a_true"]
     p_b_true = data["p_b_true"]
 
+    p_true_diff = None
+    p_true_relative = None
+
+    if p_a_true is not None and p_b_true is not None:
+        p_true_diff = p_b_true - p_a_true
+        p_true_relative = p_true_diff / p_a_true
+
     for offset, cumulative in enumerate([False, True]):
         options = {"cumulative": cumulative}
-        plot_histogram_overlap(axes[0 + offset], p_a_true, p_b_true, trace, **options)
+        plot_histogram_overlap(
+            axes[0 + offset],
+            trace,
+            p_a_true=p_a_true,
+            p_b_true=p_b_true,
+            **options,
+        )
         plot_histogram_single(
             axes[2 + offset],
-            p_a_true,
             p_a,
+            p_true=p_a_true,
             value_name="$p_a$",
             color_number=2,
             **options,
         )
+        plot_histogram_single(
+            axes[4 + offset],
+            p_b,
+            p_true=p_b_true,
+            value_name="$p_b$",
+            color_number=4,
+            **options,
+        )
+        plot_histogram_single(
+            axes[6 + offset],
+            p_b - p_a,
+            p_true=p_true_diff,
+            value_name="$p_b - p_a$",
+            color_number=6,
+            **options,
+        )
+        plot_histogram_single(
+            axes[8 + offset],
+            (p_b - p_a) / p_a,
+            p_true=p_true_relative,
+            value_name="$(p_b - p_a) / p_a$",
+            color_number=8,
+            **options,
+        )
+
+        # 観測値がある場合
         if metrics:
             axes[2 + offset].plot(
                 metrics["obs_a"]["obs_mean"],
@@ -338,15 +384,6 @@ def plot_distribution(
                 alpha=0.8,
                 color="black",
             )
-        plot_histogram_single(
-            axes[4 + offset],
-            p_b_true,
-            p_b,
-            value_name="$p_b$",
-            color_number=4,
-            **options,
-        )
-        if metrics:
             axes[4 + offset].plot(
                 metrics["obs_b"]["obs_mean"],
                 0,
@@ -355,23 +392,6 @@ def plot_distribution(
                 alpha=0.8,
                 color="black",
             )
-
-        # 真値が設定されている場合は相対値を計算
-        p_true_diff = None
-        p_true_relative = None
-        if p_a_true is not None and p_b_true is not None:
-            p_true_diff = p_b_true - p_a_true
-            p_true_relative = p_true_diff / p_a_true
-
-        plot_histogram_single(
-            axes[6 + offset],
-            p_true_diff,
-            p_b - p_a,
-            value_name="$p_b - p_a$",
-            color_number=6,
-            **options,
-        )
-        if metrics:
             axes[6 + offset].plot(
                 metrics["obs_compare"]["obs_mean_uplift"],
                 0,
@@ -380,15 +400,6 @@ def plot_distribution(
                 alpha=0.8,
                 color="black",
             )
-        plot_histogram_single(
-            axes[8 + offset],
-            p_true_relative,
-            (p_b - p_a) / p_a,
-            value_name="$(p_b - p_a) / p_a$",
-            color_number=8,
-            **options,
-        )
-        if metrics:
             axes[8 + offset].plot(
                 metrics["obs_compare"]["obs_mean_relative_uplift"],
                 0,
@@ -439,6 +450,8 @@ def output_results(
     data, model, trace, metrics, hdi_prob, prob_summary_df, kwargs
         分析と出力に必要な各種オブジェクトとパラメータ。
     """
+    logger = logging.getLogger(__name__)
+
     # make dirs
     os.makedirs(kwargs["csv_output_dir"], exist_ok=True)
     os.makedirs(kwargs["figure_dir"], exist_ok=True)
@@ -462,7 +475,9 @@ def output_results(
 
     # 各 chain のトレースプロットを出力
     savefig(
-        make_fig_from_axes(axes=pm.plot_trace(trace, compact=False, combined=False)),
+        make_fig_from_axes(
+            axes=pm.plot_trace(trace, compact=False, combined=False)
+        ),
         Path(kwargs["figure_dir"]) / "traceplot.png",
         mlflow_log_artifact=True,
     )
@@ -504,21 +519,22 @@ def output_results(
         )
 
     # DAG を出力 (Graphvizの実行環境がない場合は以下をコメントアウト)
-    # try:
-    #     graph = pm.model_to_graphviz(model)
-    #     dag_filepath = Path(kwargs["figure_dir"]) / "dag"
-    #     graph.render(filename=dag_filepath, format="png", cleanup=True)
-    #     mlflow.log_artifact(f"{dag_filepath}.png")
-    # except ImportError:
-    #     logger.warning("Graphviz not installed, skipping DAG visualization.")
-    pass
+    try:
+        graph = pm.model_to_graphviz(model)
+        dag_filepath = Path(kwargs["figure_dir"]) / "dag"
+        graph.render(filename=dag_filepath, format="png", cleanup=True)
+        mlflow.log_artifact(f"{dag_filepath}.png")
+    except ImportError:
+        logger.warning("Graphviz not installed, skipping DAG visualization.")
 
 
 @click.command()
 @click.argument("model_filepath", type=click.Path(exists=True))
 @click.argument("data_filepath", type=click.Path(exists=True))
 @click.argument("csv_output_dir", type=click.Path())
-@click.option("--figure_dir", type=click.Path(), default="reports/figures/cvr/")
+@click.option(
+    "--figure_dir", type=click.Path(), default="reports/figures/cvr/"
+)
 @click.option("--mlflow_run_name", type=str, default="develop")
 @click.option("--hdi_prob", type=float, default=0.95)
 def main(**kwargs: Any) -> None:
