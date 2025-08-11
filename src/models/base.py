@@ -1,6 +1,7 @@
 """
 共通のモデル定義を格納するモジュール。
 """
+
 from typing import List
 
 import pymc as pm
@@ -27,7 +28,9 @@ def define_model(trials: List[int], successes: List[int]) -> pm.Model:
         定義されたPyMCモデル。
     """
     if len(trials) != 2 or len(successes) != 2:
-        raise ValueError("trialsとsuccessesは、2つの要素（グループAとB）を持つリストでなければなりません。")
+        raise ValueError(
+            "trialsとsuccessesは、2つの要素（グループAとB）を持つリストでなければなりません。"
+        )
 
     with pm.Model() as model:
         # 事前分布: 各グループのコンバージョン率pに対する無情報事前分布。

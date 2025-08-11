@@ -1,7 +1,6 @@
 import io
 import os
 import sys
-import textwrap
 
 # Add project root to path to allow imports from src
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -41,17 +40,21 @@ def run_chisquared_test(n_a, conversion_a, n_b, conversion_b) -> pd.DataFrame:
     # -------|------------|---------------|
     # Group A| conv_a     | n_a - conv_a  |
     # Group B| conv_b     | n_b - conv_b  |
-    table = np.array([
-        [conversion_a, n_a - conversion_a],
-        [conversion_b, n_b - conversion_b],
-    ])
+    table = np.array(
+        [
+            [conversion_a, n_a - conversion_a],
+            [conversion_b, n_b - conversion_b],
+        ]
+    )
 
     chi2, p, dof, _ = chi2_contingency(table, correction=False)
 
-    return pd.DataFrame({
-        "指標": ["カイ二乗値", "p値", "自由度"],
-        "値": [f"{chi2:.4f}", f"{p:.4f}", dof],
-    })
+    return pd.DataFrame(
+        {
+            "指標": ["カイ二乗値", "p値", "自由度"],
+            "値": [f"{chi2:.4f}", f"{p:.4f}", dof],
+        }
+    )
 
 
 def analyze_bayesian_results(model: pm.Model, trace, hdi_prob: float) -> tuple:

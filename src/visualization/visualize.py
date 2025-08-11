@@ -2,7 +2,7 @@ import logging
 import os
 import pickle
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import arviz as az
 import click
@@ -99,9 +99,7 @@ def calc_summary_of_obs(observations: List, p_true: float | None) -> Dict:
     }
     if p_true is not None:
         summary["obs_mean_vs_true"] = summary["obs_mean"] - p_true
-        summary["obs_mean_vs_true_relative"] = (
-            summary["obs_mean"] - p_true
-        ) / p_true
+        summary["obs_mean_vs_true_relative"] = (summary["obs_mean"] - p_true) / p_true
     return summary
 
 
@@ -123,8 +121,7 @@ def calc_metrics(
     metrics["obs_a"] = calc_summary_of_obs(data["obs_a"], data["p_a_true"])
     metrics["obs_b"] = calc_summary_of_obs(data["obs_b"], data["p_b_true"])
     metrics["obs_compare"] = {
-        "obs_mean_uplift": metrics["obs_b"]["obs_mean"]
-        - metrics["obs_a"]["obs_mean"],
+        "obs_mean_uplift": metrics["obs_b"]["obs_mean"] - metrics["obs_a"]["obs_mean"],
         "obs_mean_relative_uplift": (
             metrics["obs_b"]["obs_mean"] - metrics["obs_a"]["obs_mean"]
         )
@@ -323,9 +320,7 @@ def plot_distribution(
 
     for offset, cumulative in enumerate([False, True]):
         options = {"cumulative": cumulative}
-        plot_histogram_overlap(
-            axes[0 + offset], p_a_true, p_b_true, trace, **options
-        )
+        plot_histogram_overlap(axes[0 + offset], p_a_true, p_b_true, trace, **options)
         plot_histogram_single(
             axes[2 + offset],
             p_a_true,
@@ -467,9 +462,7 @@ def output_results(
 
     # 各 chain のトレースプロットを出力
     savefig(
-        make_fig_from_axes(
-            axes=pm.plot_trace(trace, compact=False, combined=False)
-        ),
+        make_fig_from_axes(axes=pm.plot_trace(trace, compact=False, combined=False)),
         Path(kwargs["figure_dir"]) / "traceplot.png",
         mlflow_log_artifact=True,
     )
@@ -525,9 +518,7 @@ def output_results(
 @click.argument("model_filepath", type=click.Path(exists=True))
 @click.argument("data_filepath", type=click.Path(exists=True))
 @click.argument("csv_output_dir", type=click.Path())
-@click.option(
-    "--figure_dir", type=click.Path(), default="reports/figures/cvr/"
-)
+@click.option("--figure_dir", type=click.Path(), default="reports/figures/cvr/")
 @click.option("--mlflow_run_name", type=str, default="develop")
 @click.option("--hdi_prob", type=float, default=0.95)
 def main(**kwargs: Any) -> None:
