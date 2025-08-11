@@ -18,21 +18,44 @@ import pymc as pm
 from src.utils import make_fig_from_axes, savefig
 
 
-def load_theta(filepath) -> Tuple:
-    """load true parameters"""
-    theta = pickle.load(open(filepath, "rb"))
-    p_a_true = theta["p_a_true"]
-    p_b_true = theta["p_b_true"]
-    observations_a = theta["obs_a"]
-    observations_b = theta["obs_b"]
-    return p_a_true, p_b_true, observations_a, observations_b
+def load_data(filepath) -> Dict:
+    """
+    シミュレーションまたは実データのpickleファイルを読み込みます。
+
+    ファイルに存在するキーに応じて、'true'（シミュレーションの真の値）、
+    'obs'（観測値）、および生の観測データを辞書として返します。
+    """
+    data = pickle.load(open(filepath, "rb"))
+    # 'p_a_true' があればシミュレーションデータ、なければ実データと判断
+    is_simulation = "p_a_true" in data
+
+    loaded_data = {
+        "p_a_true": data.get("p_a_true"),
+        "p_b_true": data.get("p_b_true"),
+        "p_a_obs": data.get("p_a_obs") if not is_simulation else data["obs_a"].mean(),
+        "p_b_obs": data.get("p_b_obs") if not is_simulation else data["obs_b"].mean(),
+        "obs_a": data["obs_a"],
+        "obs_b": data["obs_b"],
+    }
+    return loaded_data
 
 
 def calc_ci(posterior, hdi_prob=0.95) -> Dict:
     """
-    事後分布から確信区間を計算
+    事後分布から主要なパラメータの最高事後密度区間（HDI）を計算します。
+
+    Parameters
+    ----------
+    posterior : xarray.Dataset
+        サンプリングによる事後分布。
+    hdi_prob : float, optional
+        HDIの確率, by default 0.95
+
+    Returns
+    -------
+    Dict
+        各パラメータのHDI（下限と上限）を格納した辞書。
     """
-    # init log
     logger = logging.getLogger(__name__)
 
     # pickup sample
@@ -63,33 +86,32 @@ def calc_ci(posterior, hdi_prob=0.95) -> Dict:
     return ci
 
 
-def calc_summary_of_obs_and_true(observations: List, p_true: float) -> Dict:
+def calc_summary_of_obs(observations: List, p_true: float | None) -> Dict:
     """
-    観測値のサマリーと真の値(生成時のパラメーター)を比較
+    観測値のサマリーを計算します。
+    真の値(p_true)が与えられた場合は、それとの比較も計算します。
     """
-    disp_length = np.min([20, len(observations)])
-    return {
-        "obs": observations[:disp_length],
+    summary = {
         "obs_len": len(observations),
         "obs_sum": np.sum(observations),
         "obs_mean": np.mean(observations),
         "obs_std": np.std(observations, ddof=1),
-        "obs_mean - p_true:": np.mean(observations) - p_true,
-        "(obs_mean - p_true) / p_true:": (np.mean(observations) - p_true)
-        / p_true,
     }
+    if p_true is not None:
+        summary["obs_mean_vs_true"] = summary["obs_mean"] - p_true
+        summary["obs_mean_vs_true_relative"] = (
+            summary["obs_mean"] - p_true
+        ) / p_true
+    return summary
 
 
 def calc_metrics(
-    observations_a,
-    observations_b,
-    p_a_true,
-    p_b_true,
+    data: Dict,
     trace,
-    hdi_prob,
+    hdi_prob: float,
 ) -> Dict:
     """
-    観測値と真の値を比較し記録
+    観測値と（もしあれば）真の値を比較し、指標を記録します。
     """
     # init log
     logger = logging.getLogger(__name__)
@@ -98,8 +120,8 @@ def calc_metrics(
     metrics = {}
 
     # calc metrics
-    metrics["obs_a"] = calc_summary_of_obs_and_true(observations_a, p_a_true)
-    metrics["obs_b"] = calc_summary_of_obs_and_true(observations_b, p_b_true)
+    metrics["obs_a"] = calc_summary_of_obs(data["obs_a"], data["p_a_true"])
+    metrics["obs_b"] = calc_summary_of_obs(data["obs_b"], data["p_b_true"])
     metrics["obs_compare"] = {
         "obs_mean_uplift": metrics["obs_b"]["obs_mean"]
         - metrics["obs_a"]["obs_mean"],
@@ -134,11 +156,6 @@ def calc_prob_dist(samples, hdi_prob=0.95, divide=100) -> pd.DataFrame:
 
 def calc_prob_for_dicision(
     trace,
-    model,
-    p_a_true: float,
-    p_b_true: float,
-    observations_a: List,
-    observations_b: List,
     hdi_prob: float = 0.95,
 ) -> pd.DataFrame:
     """
@@ -271,17 +288,38 @@ def plot_histogram_overlap(
 
 
 def plot_distribution(
-    p_a_true: float | None,
-    p_b_true: float | None,
+    data: Dict,
     trace,
     metrics: dict | None,
 ) -> mpl.figure.Figure:
-    """plot histogram"""
+    """
+    A/Bテストの結果を可視化する主要な分布プロットを生成します。
+
+    このプロットには、各群のパラメータの事後分布、uplift、relative upliftの
+    ヒストグラムと累積分布関数が含まれます。
+
+    Parameters
+    ----------
+    data : Dict
+        'p_a_true', 'p_b_true' を含む可能性のあるデータ辞書。
+    trace : arviz.InferenceData
+        サンプリングのトレース。
+    metrics : dict | None
+        観測値の平均などをプロットに追記するためのメトリクス辞書。
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        生成されたプロットのFigureオブジェクト。
+    """
     fig, axes = plt.subplots(5, 2, figsize=(16, 12))
     axes = axes.flatten()
 
     p_a = trace.posterior["p"][:, :, 0].values.flatten()
     p_b = trace.posterior["p"][:, :, 1].values.flatten()
+
+    p_a_true = data["p_a_true"]
+    p_b_true = data["p_b_true"]
 
     for offset, cumulative in enumerate([False, True]):
         options = {"cumulative": cumulative}
@@ -298,7 +336,12 @@ def plot_distribution(
         )
         if metrics:
             axes[2 + offset].plot(
-                metrics["obs_a"]["obs_mean"], 0, marker="x", label="観測値の平均値"
+                metrics["obs_a"]["obs_mean"],
+                0,
+                marker="x",
+                label="観測値の平均値",
+                alpha=0.8,
+                color="black",
             )
         plot_histogram_single(
             axes[4 + offset],
@@ -310,13 +353,18 @@ def plot_distribution(
         )
         if metrics:
             axes[4 + offset].plot(
-                metrics["obs_b"]["obs_mean"], 0, marker="x", label="観測値の平均値"
+                metrics["obs_b"]["obs_mean"],
+                0,
+                marker="x",
+                label="観測値の平均値",
+                alpha=0.8,
+                color="black",
             )
 
         # 真値が設定されている場合は相対値を計算
         p_true_diff = None
         p_true_relative = None
-        if p_a_true and p_b_true:
+        if p_a_true is not None and p_b_true is not None:
             p_true_diff = p_b_true - p_a_true
             p_true_relative = p_true_diff / p_a_true
 
@@ -334,6 +382,8 @@ def plot_distribution(
                 0,
                 marker="x",
                 label="観測値の平均値",
+                alpha=0.8,
+                color="black",
             )
         plot_histogram_single(
             axes[8 + offset],
@@ -349,6 +399,8 @@ def plot_distribution(
                 0,
                 marker="x",
                 label="観測値の平均値",
+                alpha=0.8,
+                color="black",
             )
 
     # 軸のスケールを一致
@@ -375,8 +427,7 @@ def save_csv_and_log_artifact(df: pd.DataFrame, path) -> None:
 
 
 def output_results(
-    p_a_true,
-    p_b_true,
+    data: Dict,
     model,
     trace,
     metrics,
@@ -384,8 +435,15 @@ def output_results(
     prob_summary_df,
     kwargs,
 ) -> None:
-    """結果を出力"""
+    """
+    分析結果（メトリクス、サマリー、プロット）をファイルに出力し、
+    MLflowにもログを記録します。
 
+    Parameters
+    ----------
+    data, model, trace, metrics, hdi_prob, prob_summary_df, kwargs
+        分析と出力に必要な各種オブジェクトとパラメータ。
+    """
     # make dirs
     os.makedirs(kwargs["csv_output_dir"], exist_ok=True)
     os.makedirs(kwargs["figure_dir"], exist_ok=True)
@@ -419,8 +477,7 @@ def output_results(
     # サンプルの分布を出力
     savefig(
         plot_distribution(
-            p_a_true,
-            p_b_true,
+            data,
             trace,
             metrics,
         ),
@@ -453,16 +510,20 @@ def output_results(
             mlflow_log_artifact=True,
         )
 
-    # DAG を出力
-    graph = pm.model_to_graphviz(model)
-    dag_filepath = Path(kwargs["figure_dir"]) / "dag"
-    graph.render(filename=dag_filepath, format="png", cleanup=True)
-    mlflow.log_artifact(f"{dag_filepath}.png")
+    # DAG を出力 (Graphvizの実行環境がない場合は以下をコメントアウト)
+    # try:
+    #     graph = pm.model_to_graphviz(model)
+    #     dag_filepath = Path(kwargs["figure_dir"]) / "dag"
+    #     graph.render(filename=dag_filepath, format="png", cleanup=True)
+    #     mlflow.log_artifact(f"{dag_filepath}.png")
+    # except ImportError:
+    #     logger.warning("Graphviz not installed, skipping DAG visualization.")
+    pass
 
 
 @click.command()
 @click.argument("model_filepath", type=click.Path(exists=True))
-@click.argument("theta_filepath", type=click.Path(exists=True))
+@click.argument("data_filepath", type=click.Path(exists=True))
 @click.argument("csv_output_dir", type=click.Path())
 @click.option(
     "--figure_dir", type=click.Path(), default="reports/figures/cvr/"
@@ -471,10 +532,10 @@ def output_results(
 @click.option("--hdi_prob", type=float, default=0.95)
 def main(**kwargs: Any) -> None:
     """
-    メイン処理
-    サンプリング結果を分析する
+    サンプリング結果とデータを読み込み、分析、可視化、結果の保存を行う
+    メインのCLI処理。
+    dvcのパイプラインから実行されることを想定しています。
     """
-    # init log
     logger = logging.getLogger(__name__)
     logger.info("start process")
     mlflow.set_experiment("analysis")
@@ -487,31 +548,23 @@ def main(**kwargs: Any) -> None:
     # set param
     hdi_prob = kwargs["hdi_prob"]
 
-    # load model, trace, theta
+    # load model, trace, data
     model, trace = cloudpickle.load(open(kwargs["model_filepath"], "rb"))
-    p_a_true, p_b_true, observations_a, observations_b = load_theta(
-        kwargs["theta_filepath"]
-    )
+    data = load_data(kwargs["data_filepath"])
 
     # 指標を計算
     metrics = calc_metrics(
-        observations_a,
-        observations_b,
-        p_a_true,
-        p_b_true,
+        data,
         trace,
         hdi_prob,
     )
 
     # 意思決定に利用する確率などの計算
-    prob_summary_df = calc_prob_for_dicision(
-        trace, model, p_a_true, p_b_true, observations_a, observations_b
-    )
+    prob_summary_df = calc_prob_for_dicision(trace)
 
     # 結果を出力
     output_results(
-        p_a_true,
-        p_b_true,
+        data,
         model,
         trace,
         metrics,

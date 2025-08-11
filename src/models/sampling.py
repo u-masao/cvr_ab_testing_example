@@ -9,11 +9,23 @@ import cloudpickle
 import mlflow
 import pymc as pm
 
+from src.models.base import define_model
 
-def aggregate(dataset: Dict) -> Tuple:
-    """0と1の観測値を試行回数と成功回数に集計"""
 
-    # init logger
+def aggregate(dataset: Dict) -> Tuple[List[int], List[int]]:
+    """
+    観測データ（0と1の配列）から、試行回数と成功回数を集計します。
+
+    Parameters
+    ----------
+    dataset : Dict
+        'obs_a' と 'obs_b' のキーに観測値の配列を持つ辞書。
+
+    Returns
+    -------
+    Tuple[List[int], List[int]]
+        タプル。(試行回数のリスト, 成功回数のリスト)
+    """
     logger = logging.getLogger(__name__)
 
     # count obs
@@ -32,38 +44,20 @@ def aggregate(dataset: Dict) -> Tuple:
     return trials, successes
 
 
-def define_model(trials: List, successes: List) -> pm.Model:
-    """モデルを定義"""
-    # init model
-    model = pm.Model()
-
-    # define model
-    with model:
-        p = pm.Beta("p", alpha=1.0, beta=1.0, shape=2)
-        obs = pm.Binomial(  # noqa: F841
-            "y", n=trials, p=p, shape=2, observed=successes
-        )
-        relative_uplift = pm.Deterministic(  # noqa: F841
-            "relative_uplift", p[1] / p[0] - 1.0
-        )
-        uplift = pm.Deterministic("uplift", p[1] - p[0])  # noqa: F841
-    return model
-
-
 def sampling(model: pm.Model, kwargs: Any) -> Tuple:
-    """sampling"""
+    """MCMCサンプリングを実行します。"""
 
     with model:
-        # set Metropolis-Hastings sampling step
-        step = pm.Metropolis()
-
-        # sampling
+        # pm.sampleのstep引数を指定しない場合、PyMCは最適なサンプラーを自動で選択します。
+        # 通常、効率的なNUTS (No-U-Turn Sampler) が使用されます。
+        # このサンプルコードでは、以前はMetropolis-Hastingsが指定されていましたが、
+        # より現代的で推奨されるアプローチとして、自動選択に任せます。
         trace = pm.sample(
-            kwargs["n_sampling"],
+            draws=kwargs["n_sampling"],
             tune=kwargs["n_tune"],
-            step=step,
             chains=kwargs["n_chains"],
             random_seed=kwargs["random_seed"],
+            progressbar=True,
         )
 
     return model, trace
@@ -78,9 +72,11 @@ def sampling(model: pm.Model, kwargs: Any) -> Tuple:
 @click.option("--random_seed", type=int, default=1234)
 @click.option("--mlflow_run_name", type=str, default="develop")
 def main(**kwargs: Any) -> None:
-    """メイン処理"""
-
-    # init log
+    """
+    データセットを読み込み、ベイズモデルを定義し、MCMCサンプリングを実行して、
+    結果のモデルとトレースを保存するメイン処理。
+    dvcのパイプラインから実行されることを想定しています。
+    """
     logger = logging.getLogger(__name__)
     logger.info("start process")
     mlflow.set_experiment("sampling")

@@ -21,7 +21,7 @@ PYTHON_INTERPRETER = python3
 
 ## run ui
 ui:
-	PYTHONPATH=. poetry run gradio src/ui.py
+	PYTHONPATH=. poetry run python src/ui.py
 
 ## dvc repro
 repro: check_commit PIPELINE.md

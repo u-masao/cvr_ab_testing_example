@@ -9,26 +9,33 @@ import pandas as pd
 
 def make_dataset(df: pd.DataFrame) -> Dict:
     """
-    入力データを集計し、頻度を計算する。
+    入力データフレームから観測データを集計し、統計量を計算します。
 
     Parameters
     ----------
     df : pd.DataFrame
-        コンバージョン有無のフラグデータ
-        n 行、2 列
-        1列目をA群、2列目をB群とする
-        null はカウントしない
+        コンバージョン有無のフラグデータ。
+        'obs_a' と 'obs_b' という名前の列を持つことを期待します。
+        欠損値 (null) は計算前に除外されます。
+
+    Returns
+    -------
+    Dict
+        各群の試行回数(n)、観測されたコンバージョン率(p_obs)、
+        および観測値の配列(obs)を含む辞書。
     """
     results = {}
-    for index, (n, p, obs) in enumerate(
-        [
-            ["n_a", "p_a_true", "obs_a"],
-            ["n_b", "p_b_true", "obs_b"],
-        ]
-    ):
-        results[n] = len(df.iloc[:, index].dropna())
-        results[p] = df.iloc[:, index].mean()
-        results[obs] = df.iloc[:, index].dropna().values
+    for n_key, p_key, obs_key in [
+        ("n_a", "p_a_obs", "obs_a"),
+        ("n_b", "p_b_obs", "obs_b"),
+    ]:
+        if obs_key not in df.columns:
+            raise ValueError(f"入力データに '{obs_key}' カラムが見つかりません。")
+
+        observations = df[obs_key].dropna()
+        results[n_key] = len(observations)
+        results[p_key] = observations.mean()
+        results[obs_key] = observations.values
 
     return results
 
