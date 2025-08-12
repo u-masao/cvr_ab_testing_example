@@ -190,7 +190,7 @@ def build_ui():
             power_analysis_output,
         ) = power_analysis_components
 
-        chisq_event = start_button.click(
+        start_button.click(
             fn=run_chisquared_test,
             inputs=[
                 n_a,
@@ -201,8 +201,7 @@ def build_ui():
             outputs=[
                 chisq_result_df,
             ],
-        )
-        chisq_event.then(
+        ).then(
             fn=run_bayesian_analysis,
             inputs=[
                 n_a,
