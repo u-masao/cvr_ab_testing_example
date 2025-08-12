@@ -12,6 +12,7 @@ import statsmodels.stats.power as smp
 import statsmodels.stats.proportion as smprop
 from PIL import Image
 from scipy.stats import chi2_contingency
+from statsmodels.stats.proportion import proportion_confint
 from tqdm import tqdm
 
 from src.models.base import define_model
@@ -85,7 +86,13 @@ def calculate_sample_size(
     return result_dict
 
 
-def run_chisquared_test(n_a, conversion_a, n_b, conversion_b) -> pd.DataFrame:
+def run_chisquared_test(
+    n_a,
+    conversion_a,
+    n_b,
+    conversion_b,
+    hdi_prob,
+) -> pd.DataFrame:
     """
     A/Bテストデータに対してカイ二乗検定を実行します。
 
@@ -95,6 +102,8 @@ def run_chisquared_test(n_a, conversion_a, n_b, conversion_b) -> pd.DataFrame:
         A群の試行回数とコンバージョン数。
     n_b, conversion_b : int
         B群の試行回数とコンバージョン数。
+    hdi_prob: float
+        1-有意水準
 
     Returns
     -------
@@ -113,12 +122,30 @@ def run_chisquared_test(n_a, conversion_a, n_b, conversion_b) -> pd.DataFrame:
         ]
     )
 
+    # カイ二乗検定
     chi2, p, dof, _ = chi2_contingency(table, correction=False)
+
+    # 比率の信頼区間（Clopper-Pearson法）
+    # alpha=0.05 は信頼水準95%を意味します。
+    alpha = 1.0 - hdi_prob
+    conf_interval_a = proportion_confint(
+        count=conversion_a, nobs=n_a, alpha=alpha, method="beta"
+    )
+    conf_interval_b = proportion_confint(
+        count=conversion_b, nobs=n_b, alpha=alpha, method="beta"
+    )
 
     return pd.DataFrame(
         {
-            "指標": ["カイ二乗値", "p値", "自由度"],
-            "値": [f"{chi2:.4f}", f"{p:.4f}", dof],
+            "指標": ["カイ二乗値", "p値", "自由度", "A 群信頼区間", "B 群信頼区間", "有意水準"],
+            "値": [
+                f"{chi2:.4f}",
+                f"{p:.4f}",
+                dof,
+                f"({conf_interval_a[0]:.4f},{conf_interval_a[1]:.4f})",
+                f"({conf_interval_b[0]:.4f},{conf_interval_b[1]:.4f})",
+                hdi_prob,
+            ],
         }
     )
 
