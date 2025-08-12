@@ -21,74 +21,88 @@ def create_header():
         gr.Markdown(text_about_this_tool)
 
 
-def create_main_tab():
-    """メインの分析タブを作成します"""
-    with gr.Tab("A/Bテスト分析"):
-        # --- 入力コンポーネント ---
-        gr.Markdown("## 1. テスト結果の入力")
-        with gr.Row():
-            with gr.Column():
-                gr.Markdown("### A群")
-                n_a = gr.Number(1000, label="試行回数 (サンプルサイズ)")
-                conversion_a = gr.Number(53, label="コンバージョン数")
-            with gr.Column():
-                gr.Markdown("### B群")
-                n_b = gr.Number(100, label="試行回数 (サンプルサイズ)")
-                conversion_b = gr.Number(10, label="コンバージョン数")
+def create_main_components(demo):
+    # --- 入力コンポーネント ---
+    gr.Markdown("## 1. テスト結果の入力")
+    with gr.Row():
+        with gr.Column():
+            gr.Markdown("### A群")
+            n_a = gr.Number(1000, label="試行回数 (サンプルサイズ)")
+            conversion_a = gr.Number(53, label="コンバージョン数")
+        with gr.Column():
+            gr.Markdown("### B群")
+            n_b = gr.Number(100, label="試行回数 (サンプルサイズ)")
+            conversion_b = gr.Number(10, label="コンバージョン数")
 
-        with gr.Accordion("⚙️ ベイズ分析の詳細設定", open=False):
-            n_sampling = gr.Number(4000, label="サンプリング回数 (draws)")
-            n_tune = gr.Number(1000, label="チューニング回数 (tune)")
-            n_chains = gr.Number(4, label="チェーン数")
-            hdi_prob = gr.Number(
-                0.95, label="Highest Density Interval (HDI:最高事後密度区間)"
+    with gr.Accordion("⚙️  ベイズ分析の詳細設定", open=False):
+        n_sampling = gr.Number(4000, label="サンプリング回数 (draws)")
+        n_tune = gr.Number(1000, label="チューニング回数 (tune)")
+        n_chains = gr.Number(4, label="チェーン数")
+        hdi_prob = gr.Number(
+            0.95, label="Highest Density Interval (HDI:最高事後密度区間)"
+        )
+        random_seed = gr.Number(1234, label="ランダムシード")
+
+    create_power_analysis_components(demo)
+    start_button = gr.Button("分析開始", variant="primary")
+
+    # --- 出力コンポーネント ---
+    gr.Markdown("## 2. 分析結果")
+    with gr.Row():
+        with gr.Column(scale=5):
+            gr.Markdown("### ベイズ分析の結果")
+            with gr.Tabs():
+                with gr.TabItem("📈 分布"):
+                    distribution = gr.Plot()
+                with gr.TabItem("📊 サマリー"):
+                    params = gr.Plot()
+                with gr.TabItem("🕸️ モデル"):
+                    model_img = gr.Image()
+                with gr.TabItem("🛰️ トレースプロット"):
+                    trace_plot = gr.Plot()
+        with gr.Column(scale=1):
+            gr.Markdown("### カイ二乗検定の結果")
+            chisq_result_df = gr.DataFrame(
+                headers=["指標", "値"], datatype=["str", "str"], label="検定結果"
             )
-            random_seed = gr.Number(1234, label="ランダムシード")
 
-        start_button = gr.Button("分析開始", variant="primary")
-
-        # --- 出力コンポーネント ---
-        gr.Markdown("## 2. 分析結果")
-        with gr.Row():
-            with gr.Column(scale=5):
-                gr.Markdown("### ベイズ分析の結果")
-                with gr.Tabs():
-                    with gr.TabItem("📈 分布"):
-                        distribution = gr.Plot()
-                    with gr.TabItem("📊 サマリー"):
-                        params = gr.Plot()
-                    with gr.TabItem("🕸️ モデル"):
-                        model_img = gr.Image()
-                    with gr.TabItem("🛰️ トレースプロット"):
-                        trace_plot = gr.Plot()
-            with gr.Column(scale=1):
-                gr.Markdown("### カイ二乗検定の結果")
-                chisq_result_df = gr.DataFrame(
-                    headers=["指標", "値"], datatype=["str", "str"], label="検定結果"
-                )
-    # 戻り値の順番に注意
-    return (
-        n_a,
-        conversion_a,
-        n_b,
-        conversion_b,
-        n_sampling,
-        n_tune,
-        n_chains,
-        random_seed,
-        hdi_prob,
-        start_button,
-        chisq_result_df,
-        distribution,
-        model_img,
-        trace_plot,
-        params,
+    start_button.click(
+        fn=run_chisquared_test,
+        inputs=[
+            n_a,
+            conversion_a,
+            n_b,
+            conversion_b,
+            hdi_prob,
+        ],
+        outputs=[
+            chisq_result_df,
+        ],
+    ).then(
+        fn=run_bayesian_analysis,
+        inputs=[
+            n_a,
+            conversion_a,
+            n_b,
+            conversion_b,
+            n_sampling,
+            n_tune,
+            n_chains,
+            random_seed,
+            hdi_prob,
+        ],
+        outputs=[
+            distribution,
+            model_img,
+            trace_plot,
+            params,
+        ],
     )
 
 
-def create_power_analysis_tab():
-    """サンプルサイズ計算タブを作成します"""
-    with gr.Tab("サンプルサイズ計算"):
+def create_power_analysis_components(demo):
+    """サンプルサイズ計算コンポーネントを作成します"""
+    with gr.Accordion("🙏 サンプルサイズ計算", open=False):
         with gr.Row():
             with gr.Column():
                 power_analysis_inputs = {
@@ -131,14 +145,18 @@ def create_power_analysis_tab():
             with gr.Column():
                 power_analysis_sample_size_a = gr.Number(label="A 群のサンプルサイズ")
                 power_analysis_sample_size_b = gr.Number(label="B 群のサンプルサイズ")
-                with gr.Accordion("分析結果の詳細", open=False):
+                with gr.Accordion("🔍分析結果の詳細", open=False):
                     gr.Markdown("Cohen's h で効果量を計算し、サンプルサイズを計算しています")
                     power_analysis_output = gr.DataFrame()
-    return (
-        power_analysis_inputs,
-        power_analysis_sample_size_a,
-        power_analysis_sample_size_b,
-        power_analysis_output,
+    gr.on(
+        triggers=[x.change for x in power_analysis_inputs.values()],
+        fn=run_power_analysis,
+        inputs=[x for x in power_analysis_inputs.values()],
+        outputs=[
+            power_analysis_sample_size_a,
+            power_analysis_sample_size_b,
+            power_analysis_output,
+        ],
     )
 
 
@@ -156,84 +174,16 @@ def create_explanation_section():
                 gr.Markdown(text_bayesien_vs_chi_squared)
 
 
-def build_ui():
+def build_ui(demo):
     """Gradio UI全体を構築し、イベントリスナーを設定します"""
-    with gr.Blocks(theme=gr.themes.Soft()) as demo:
-        create_header()
-        with gr.Tabs():
-            main_tab_components = create_main_tab()
-            power_analysis_components = create_power_analysis_tab()
-        create_explanation_section()
+    create_header()
+    create_main_components(demo)
+    create_explanation_section()
 
-        # --- イベントリスナー ---
-        (
-            n_a,
-            conversion_a,
-            n_b,
-            conversion_b,
-            n_sampling,
-            n_tune,
-            n_chains,
-            random_seed,
-            hdi_prob,
-            start_button,
-            chisq_result_df,
-            distribution,
-            model_img,
-            trace_plot,
-            params,
-        ) = main_tab_components
-        (
-            power_analysis_inputs,
-            power_analysis_sample_size_a,
-            power_analysis_sample_size_b,
-            power_analysis_output,
-        ) = power_analysis_components
 
-        start_button.click(
-            fn=run_chisquared_test,
-            inputs=[
-                n_a,
-                conversion_a,
-                n_b,
-                conversion_b,
-            ],
-            outputs=[
-                chisq_result_df,
-            ],
-        ).then(
-            fn=run_bayesian_analysis,
-            inputs=[
-                n_a,
-                conversion_a,
-                n_b,
-                conversion_b,
-                n_sampling,
-                n_tune,
-                n_chains,
-                random_seed,
-                hdi_prob,
-            ],
-            outputs=[
-                distribution,
-                model_img,
-                trace_plot,
-                params,
-            ],
-        )
-        gr.on(
-            triggers=[x.change for x in power_analysis_inputs.values()],
-            fn=run_power_analysis,
-            inputs=[x for x in power_analysis_inputs.values()],
-            outputs=[
-                power_analysis_sample_size_a,
-                power_analysis_sample_size_b,
-                power_analysis_output,
-            ],
-        )
-    return demo
+with gr.Blocks(theme=gr.themes.Soft()) as demo:
+    build_ui(demo)
 
 
 if __name__ == "__main__":
-    ui = build_ui()
-    ui.launch(share=False)
+    demo.launch(share=False)
